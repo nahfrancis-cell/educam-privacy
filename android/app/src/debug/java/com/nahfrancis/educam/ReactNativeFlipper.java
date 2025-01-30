@@ -4,7 +4,7 @@
  * <p>This source code is licensed under the MIT license found in the LICENSE file in the root
  * directory of this source tree.
  */
-package com.ftabtech.cgcekey;
+package com.nahfrancis.educam;
 
 import android.content.Context;
 import com.facebook.flipper.android.AndroidFlipperClient;
@@ -58,17 +58,11 @@ public class ReactNativeFlipper {
               @Override
               public void onReactContextInitialized(ReactContext reactContext) {
                 reactInstanceManager.removeReactInstanceEventListener(this);
-                reactContext.runOnNativeModulesQueueThread(
-                    new Runnable() {
-                      @Override
-                      public void run() {
-                        client.addPlugin(new FrescoFlipperPlugin());
-                      }
-                    });
+                FrescoFlipperPlugin.initializeFlipper(reactContext, client);
               }
             });
       } else {
-        client.addPlugin(new FrescoFlipperPlugin());
+        FrescoFlipperPlugin.initializeFlipper(reactContext, client);
       }
     }
   }

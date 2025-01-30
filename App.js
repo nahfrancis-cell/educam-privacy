@@ -32,7 +32,7 @@ import PasswordVerificationScreen from './src/screens/PasswordVerificationScreen
 const Stack = createNativeStackNavigator();
 
 // Handle deep linking
-const scheme = 'com.ftabtech.cgcekey';
+const scheme = 'com.nahfrancis.educam';
 const prefix = Platform.OS === 'web' ? window.location.origin : `${scheme}://`;
 
 const linking = {
@@ -98,9 +98,9 @@ const App = () => {
 
 // Register the app
 if (Platform.OS === 'web') {
-  AppRegistry.registerComponent('cgcekey', () => App);
+  AppRegistry.registerComponent('educam', () => App);
 } else {
-  AppRegistry.registerComponent('cgcekey', () => App);
+  AppRegistry.registerComponent('educam', () => App);
 }
 
 export default App;

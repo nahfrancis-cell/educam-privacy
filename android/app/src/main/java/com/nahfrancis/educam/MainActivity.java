@@ -1,4 +1,4 @@
-package com.ftabtech.cgcekey;
+package com.nahfrancis.educam;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -49,17 +49,11 @@ public class MainActivity extends ReactActivity {
    * @see <a href="https://developer.android.com/reference/android/app/Activity#onBackPressed()">onBackPressed</a>
    */
   @Override
-  public void invokeDefaultOnBackPressed() {
+  public void onBackPressed() {
     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-      if (!moveTaskToBack(false)) {
-        // For non-root activities, use the default implementation to finish them.
-        super.invokeDefaultOnBackPressed();
+      if (!moveTaskToBack(true)) {
+        super.onBackPressed();
       }
-      return;
     }
-
-    // Use the default back button implementation on Android S
-    // because it's doing more than {@link Activity#moveTaskToBack} in fact.
-    super.invokeDefaultOnBackPressed();
   }
 }
