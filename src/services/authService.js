@@ -215,10 +215,8 @@ export const authService = {
         throw new Error('Please enter a valid email address');
       }
 
-      // Send password reset email through Supabase with Vercel hosted page
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://gceprep-password-reset.vercel.app/reset-password'
-      });
+      // Send password reset email through Supabase
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
 
       if (error) {
         console.error('Password reset error:', error);

@@ -45,7 +45,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
         [
           {
             text: 'OK',
-            onPress: () => navigation.goBack()
+            onPress: () => navigation.navigate('PasswordVerification', { email })
           }
         ]
       );

@@ -12,37 +12,19 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '../config/supabase.config';
 
-const ResetPasswordScreen = ({ navigation, route }) => {
-  const email = route.params?.email || '';
+const PasswordVerificationScreen = ({ navigation, route }) => {
+  const { email } = route.params;
   const [verificationCode, setVerificationCode] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleVerifyAndReset = async () => {
+  const handleVerifyCode = async () => {
     if (!verificationCode) {
       Alert.alert('Error', 'Please enter the verification code');
       return;
     }
 
-    if (!newPassword || !confirmPassword) {
-      Alert.alert('Error', 'Please enter and confirm your new password');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
-      return;
-    }
-
     setIsLoading(true);
     try {
-      // Verify the code and update password
       const { error } = await supabase.auth.verifyOtp({
         email,
         token: verificationCode,
@@ -51,23 +33,8 @@ const ResetPasswordScreen = ({ navigation, route }) => {
 
       if (error) throw error;
 
-      // Update the password
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-
-      if (updateError) throw updateError;
-
-      Alert.alert(
-        'Success',
-        'Your password has been reset successfully',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('Login')
-          }
-        ]
-      );
+      // If verification is successful, navigate to reset password screen
+      navigation.navigate('ResetPasswordConfirm', { email });
     } catch (error) {
       Alert.alert('Error', error.message);
     } finally {
@@ -85,7 +52,7 @@ const ResetPasswordScreen = ({ navigation, route }) => {
       </TouchableOpacity>
 
       <View style={styles.content}>
-        <Text style={styles.title}>Reset Password</Text>
+        <Text style={styles.title}>Verify Code</Text>
         <Text style={styles.subtitle}>Enter the verification code sent to your email</Text>
 
         <View style={styles.form}>
@@ -97,40 +64,19 @@ const ResetPasswordScreen = ({ navigation, route }) => {
               value={verificationCode}
               onChangeText={setVerificationCode}
               keyboardType="number-pad"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>New Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter new password"
-              value={newPassword}
-              onChangeText={setNewPassword}
-              secureTextEntry
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Confirm Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm new password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
+              autoCapitalize="none"
             />
           </View>
 
           <TouchableOpacity
             style={[styles.button, isLoading && styles.buttonDisabled]}
-            onPress={handleVerifyAndReset}
+            onPress={handleVerifyCode}
             disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.buttonText}>Reset Password</Text>
+              <Text style={styles.buttonText}>Verify Code</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -197,4 +143,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ResetPasswordScreen;
+export default PasswordVerificationScreen;

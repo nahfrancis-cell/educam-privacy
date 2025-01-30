@@ -168,19 +168,14 @@ export default function TopicAndQuestionTypeScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <TouchableOpacity 
-        style={styles.returnButton}
-        onPress={() => navigation.goBack()}
-      >
-        <MaterialIcons name="arrow-back" size={24} color="black" />
-        <Text style={styles.returnButtonText}>Return</Text>
-      </TouchableOpacity>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+        <TouchableOpacity
+          style={styles.returnButton}
+          onPress={() => navigation.goBack()}
+        >
+          <MaterialIcons name="arrow-back" size={24} color="#34C759" />
+        </TouchableOpacity>
 
-      <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewContent}
-        showsVerticalScrollIndicator={false}
-      >
         <View style={styles.container}>
           <Text style={styles.title}>Select Options</Text>
 
@@ -314,15 +309,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0f2e0',
   },
   returnButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
     padding: 10,
     paddingTop: Platform.OS === 'android' ? 40 : 10,
-  },
-  returnButtonText: {
-    fontSize: 16,
-    marginLeft: 5,
-    color: 'black',
+    marginTop: 10,
   },
   scrollView: {
     flex: 1,

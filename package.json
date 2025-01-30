@@ -1,8 +1,8 @@
 {
-  "name": "cgcekey",
+  "name": "educam",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start --dev-client",
+    "start": "expo start",
     "web": "expo start --web",
     "android": "expo run:android",
     "ios": "expo run:ios"
@@ -20,7 +20,6 @@
     "crypto-browserify": "^3.12.1",
     "expo": "~49.0.15",
     "expo-constants": "~14.4.2",
-    "expo-dev-client": "~2.4.13",
     "expo-image-picker": "~14.3.2",
     "expo-linear-gradient": "~12.3.0",
     "expo-linking": "~5.0.2",
@@ -41,7 +40,15 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "@expo/webpack-config": "^19.0.0"
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",
+    "@babel/plugin-proposal-optional-chaining": "^7.21.0",
+    "@babel/plugin-transform-arrow-functions": "^7.25.9",
+    "@babel/plugin-transform-nullish-coalescing-operator": "^7.26.6",
+    "@babel/plugin-transform-optional-chaining": "^7.25.9",
+    "@babel/plugin-transform-shorthand-properties": "^7.25.9",
+    "@babel/plugin-transform-template-literals": "^7.25.9",
+    "@expo/webpack-config": "^19.0.0",
+    "sharp-cli": "^5.1.0"
   },
   "private": true
 }

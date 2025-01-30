@@ -16,6 +16,7 @@ import CreateAccountScreen from './src/screens/CreateAccountScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import MCQQuestionScreen from './src/screens/MCQQuestionScreen';
+import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
 import ResetPasswordConfirmScreen from './src/screens/ResetPasswordConfirmScreen';
 import AccessTypeScreen from './src/screens/AccessTypeScreen';
@@ -26,6 +27,7 @@ import StructuralQuestionScreen from './src/screens/StructuralQuestionScreen';
 import MainStack from './src/navigation/MainStack';
 import EnglishSubSystem from './src/screens/EnglishSubSystem';
 import EmailVerificationScreen from './src/screens/EmailVerificationScreen';
+import PasswordVerificationScreen from './src/screens/PasswordVerificationScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -75,7 +77,9 @@ const App = () => {
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
             <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
-            <Stack.Screen name="ForgotPassword" component={ResetPasswordScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            <Stack.Screen name="PasswordVerification" component={PasswordVerificationScreen} />
+            <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
             <Stack.Screen name="ResetPasswordConfirm" component={ResetPasswordConfirmScreen} />
             <Stack.Screen name="AccessType" component={AccessTypeScreen} />
             <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />

@@ -435,8 +435,9 @@ const styles = StyleSheet.create({
   },
   footer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 8,
     paddingVertical: 8,
     backgroundColor: '#fff',
     borderTopWidth: 1,
@@ -445,19 +446,19 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+    width: '100%',
   },
   navButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#4CAF50',
     borderRadius: 6,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
     paddingVertical: 8,
-    minWidth: 80,
-    maxWidth: 100,
     justifyContent: 'center',
     marginHorizontal: 2,
     minHeight: 36,
+    flex: 1,
   },
   navButtonDisabled: {
     backgroundColor: '#E0E0E0',
@@ -465,10 +466,9 @@ const styles = StyleSheet.create({
   },
   navButtonText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '500',
     textAlign: 'center',
-    flexShrink: 1,
   },
   navButtonTextDisabled: {
     color: '#999',
@@ -476,6 +476,8 @@ const styles = StyleSheet.create({
   centerButtons: {
     flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
+    flex: 2,
     gap: 4,
   },
   explanationContainer: {

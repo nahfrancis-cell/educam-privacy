@@ -50,10 +50,20 @@ const EnglishSubSystem = ({ navigation }) => {
 
   const handleEducationTypeSelect = (typeId) => {
     const selectedType = educationTypes.find(type => type.id === typeId);
-    navigation.navigate('SelectLevel', {
-      educationType: selectedType.title,
-      subjects: selectedType.subjects
-    });
+    
+    // Only allow navigation for General Education (id: 1)
+    if (typeId === 1) {
+      navigation.navigate('SelectLevel', {
+        educationType: selectedType.title,
+        subjects: selectedType.subjects
+      });
+    } else {
+      Alert.alert(
+        'Coming Soon',
+        'This section is not yet completed. Please check back later.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   return (
