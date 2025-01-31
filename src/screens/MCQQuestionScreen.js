@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { View, Text, SafeAreaView, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet, Platform, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { questionService } from '../services/questionService';
+import { supabase } from '../config/supabase.config';
 
 export default function MCQQuestionScreen({ navigation, route }) {
   const { topic, questionType } = route.params;
@@ -14,8 +15,10 @@ export default function MCQQuestionScreen({ navigation, route }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [answeredQuestions, setAnsweredQuestions] = useState({});
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
+    checkUserRole();
     if (!topic || !topic.value) {
       setError('No topic selected');
       setIsLoading(false);
@@ -23,6 +26,24 @@ export default function MCQQuestionScreen({ navigation, route }) {
     }
     fetchQuestions();
   }, [topic?.value]);
+
+  const checkUserRole = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile, error } = await supabase
+          .from('user_profiles')
+          .select('is_admin')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) throw error;
+        setCurrentUser({ ...user, role: profile.is_admin ? 'admin' : 'user' });
+      }
+    } catch (error) {
+      console.error('Error checking user role:', error);
+    }
+  };
 
   const fetchQuestions = async () => {
     try {
@@ -56,7 +77,36 @@ export default function MCQQuestionScreen({ navigation, route }) {
         throw new Error('No questions found for this topic');
       }
 
-      setQuestions(fetchedQuestions);
+      const questionsWithImages = await Promise.all(fetchedQuestions.map(async (question) => {
+        if (question.diagram) {
+          try {
+            // First check if the image exists in the bucket
+            const { data: exists } = await supabase
+              .storage
+              .from('question-images')
+              .list('', {
+                search: question.diagram
+              });
+
+            // Only get URL if image exists in bucket
+            if (exists && exists.length > 0) {
+              const { data } = supabase
+                .storage
+                .from('question-images')
+                .getPublicUrl(question.diagram);
+              
+              if (data?.publicUrl) {
+                return { ...question, imageUrl: data.publicUrl };
+              }
+            }
+          } catch (error) {
+            console.error('Error fetching image:', error);
+          }
+        }
+        return { ...question, imageUrl: null };
+      }));
+
+      setQuestions(questionsWithImages);
       setCurrentQuestionIndex(0);
       setSelectedAnswer(null);
       setShowCorrectAnswer(false);
@@ -108,17 +158,24 @@ export default function MCQQuestionScreen({ navigation, route }) {
     return optionText === correctAnswer;
   };
 
-  const renderOptionIcon = (option) => {
-    if (!showCorrectAnswer || !questions[currentQuestionIndex]) return null;
-    
-    if (isCorrectAnswer(option)) {
-      return <MaterialIcons name="check-circle" size={20} color="#4CAF50" />;
-    }
+  const renderOptionIcon = (optionLetter) => {
+    if (!showCorrectAnswer) return null;
 
-    if (option === selectedAnswer && !isCorrectAnswer(option)) {
-      return <MaterialIcons name="cancel" size={20} color="#FF5252" />;
-    }
+    const isCorrect = isCorrectAnswer(optionLetter);
+    const isSelected = optionLetter === selectedAnswer;
 
+    if (isCorrect || (isSelected && !isCorrect)) {
+      return (
+        <View style={styles.iconContainer}>
+          <MaterialIcons
+            name={isCorrect ? 'check-circle' : 'cancel'}
+            size={24}
+            color={isCorrect ? '#4CAF50' : '#f44336'}
+            style={styles.optionIcon}
+          />
+        </View>
+      );
+    }
     return null;
   };
 
@@ -142,23 +199,21 @@ export default function MCQQuestionScreen({ navigation, route }) {
         disabled={showCorrectAnswer}
       >
         <View style={styles.optionContent}>
-          <View style={styles.optionRow}>
-            <View style={[
-              styles.radioOuter,
-              showCorrectAnswer && isCorrect && styles.radioOuterCorrect,
-              showCorrectAnswer && isSelected && !isCorrect && styles.radioOuterWrong
-            ]}>
-              {(isSelected || (showCorrectAnswer && isCorrect)) && (
-                <View style={[
-                  styles.radioInner,
-                  showCorrectAnswer && isCorrect && styles.radioInnerCorrect,
-                  showCorrectAnswer && isSelected && !isCorrect && styles.radioInnerWrong
-                ]} />
-              )}
-            </View>
-            <Text style={styles.optionLetter}>{optionLetter}.</Text>
-            <Text style={styles.optionText}>{getAnswerText(optionLetter)}</Text>
+          <View style={[
+            styles.radioOuter,
+            showCorrectAnswer && isCorrect && styles.radioOuterCorrect,
+            showCorrectAnswer && isSelected && !isCorrect && styles.radioOuterWrong
+          ]}>
+            {(isSelected || (showCorrectAnswer && isCorrect)) && (
+              <View style={[
+                styles.radioInner,
+                showCorrectAnswer && isCorrect && styles.radioInnerCorrect,
+                showCorrectAnswer && isSelected && !isCorrect && styles.radioInnerWrong
+              ]} />
+            )}
           </View>
+          <Text style={styles.optionLetter}>{optionLetter}.</Text>
+          <Text style={styles.optionText}>{getAnswerText(optionLetter)}</Text>
           {renderOptionIcon(optionLetter)}
         </View>
       </TouchableOpacity>
@@ -183,6 +238,30 @@ export default function MCQQuestionScreen({ navigation, route }) {
       setShowExplanation(false);
       setShowSolution(false);
     }
+  };
+
+  const renderQuestion = () => {
+    if (!questions || questions.length === 0) return null;
+    const currentQuestion = questions[currentQuestionIndex];
+
+    return (
+      <View style={styles.questionContainer}>
+        <Text style={styles.questionText}>
+          Question {currentQuestionIndex + 1} of {questions.length}
+        </Text>
+        <Text style={styles.questionContent}>{currentQuestion.question_text}</Text>
+        
+        {currentQuestion.imageUrl && (
+          <View style={styles.imageContainer}>
+            <Image
+              source={{ uri: currentQuestion.imageUrl }}
+              style={styles.questionImage}
+              resizeMode="contain"
+            />
+          </View>
+        )}
+      </View>
+    );
   };
 
   if (isLoading) {
@@ -218,22 +297,37 @@ export default function MCQQuestionScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <TouchableOpacity 
-        style={styles.returnButton}
-        onPress={handleReturn}
-      >
-        <MaterialIcons name="arrow-back" size={24} color="#4CAF50" />
-        <Text style={styles.returnText}>Return</Text>
-      </TouchableOpacity>
-
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.mainContent}>
-          <Text style={styles.questionNumber}>Question {currentQuestionIndex + 1} of {questions.length}</Text>
-          <Text style={styles.questionText}>{questions[currentQuestionIndex]?.question_text}</Text>
+          <TouchableOpacity 
+            style={styles.returnButton} 
+            onPress={() => navigation.goBack()}
+          >
+            <MaterialIcons name="arrow-back" size={24} color="#4CAF50" />
+            <Text style={styles.returnText}>Return</Text>
+          </TouchableOpacity>
+
+          {renderQuestion()}
+
+          {/* Add Image Management Button for Admin */}
+          {currentUser?.role === 'admin' && questions[currentQuestionIndex] && (
+            <TouchableOpacity
+              style={styles.imageManageButton}
+              onPress={() => navigation.navigate('QuestionImageManager', {
+                questionId: questions[currentQuestionIndex].id,
+                questionType: 'MCQ',
+                subjectId: questions[currentQuestionIndex].subject_id,
+                topicId: topic.value
+              })}
+            >
+              <MaterialIcons name="image" size={24} color="white" />
+              <Text style={styles.imageManageText}>Manage Image</Text>
+            </TouchableOpacity>
+          )}
 
           <View style={styles.optionsContainer}>
             {renderOption('A')}
@@ -322,7 +416,7 @@ export default function MCQQuestionScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#e0f2e0',
+    backgroundColor: '#f0f9f0',
   },
   scrollView: {
     flex: 1,
@@ -334,29 +428,48 @@ const styles = StyleSheet.create({
   returnButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    paddingTop: Platform.OS === 'android' ? 40 : 10,
+    paddingTop: 40,
+    paddingLeft: 16,
+    paddingBottom: 10,
+    marginBottom: 20,
   },
   returnText: {
+    color: '#4CAF50',
     marginLeft: 8,
     fontSize: 16,
-    color: '#4CAF50',
   },
   mainContent: {
     flex: 1,
     padding: 16,
+    paddingTop: 30,
   },
-  questionNumber: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+  questionContainer: {
+    marginTop: 10,
+    marginBottom: 12,
   },
   questionText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  questionContent: {
     fontSize: 16,
     fontWeight: '500',
     color: '#333',
-    marginBottom: 20,
+    marginBottom: 16,
     lineHeight: 24,
+  },
+  imageContainer: {
+    width: '100%',
+    height: 200,
+    marginVertical: 10,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#f5f5f5',
+  },
+  questionImage: {
+    width: '100%',
+    height: '100%',
   },
   optionsContainer: {
     marginBottom: 16,
@@ -369,18 +482,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E0E0E0',
     elevation: 2,
+    position: 'relative',
   },
   optionContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
+    paddingRight: 35, // Add padding to prevent text from getting too close to the icon
   },
   optionRow: {
     flexDirection: 'row',
     flex: 1,
     alignItems: 'center',
     flexWrap: 'wrap',
+    marginRight: 10, // Add margin to create space between text and icon
   },
   radioOuter: {
     width: 20,
@@ -530,5 +646,29 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '500',
+  },
+  imageManageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 8,
+    marginVertical: 10,
+    justifyContent: 'center',
+  },
+  imageManageText: {
+    color: 'white',
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  iconContainer: {
+    position: 'absolute',
+    right: 12, // Move icon more to the right
+    top: '50%',
+    transform: [{ translateY: -12 }],
+  },
+  optionIcon: {
+    marginLeft: 'auto',
   },
 });
