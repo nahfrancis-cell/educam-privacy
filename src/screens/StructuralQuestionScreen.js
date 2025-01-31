@@ -16,6 +16,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { deepseekService } from '../services/deepseekService';
 import { questionService } from '../services/questionService';
+import { supabase } from '../services/supabase';
 
 export default function StructuralQuestionScreen({ navigation, route }) {
   const { topic, questionType } = route.params;
@@ -83,9 +84,39 @@ export default function StructuralQuestionScreen({ navigation, route }) {
         throw new Error('No questions found for this topic');
       }
 
-      setQuestions(fetchedQuestions);
+      // Add image URLs for questions that have diagrams
+      const questionsWithImages = await Promise.all(fetchedQuestions.map(async (question) => {
+        if (question.diagram) {
+          try {
+            // First check if the image exists in the bucket
+            const { data: exists } = await supabase
+              .storage
+              .from('question-images')
+              .list('', {
+                search: question.diagram
+              });
+
+            // Only get URL if image exists in bucket
+            if (exists && exists.length > 0) {
+              const { data } = supabase
+                .storage
+                .from('question-images')
+                .getPublicUrl(question.diagram);
+              
+              if (data?.publicUrl) {
+                return { ...question, imageUrl: data.publicUrl };
+              }
+            }
+          } catch (error) {
+            console.error('Error fetching image:', error);
+          }
+        }
+        return { ...question, imageUrl: null };
+      }));
+
+      setQuestions(questionsWithImages);
       setCurrentQuestionIndex(0);
-      setCurrentQuestion(fetchedQuestions[0]);
+      setCurrentQuestion(questionsWithImages[0]);
       setUserAnswer('');
     } catch (error) {
       setErrorMessage(error.message || 'Failed to load questions');
@@ -205,7 +236,6 @@ export default function StructuralQuestionScreen({ navigation, route }) {
           onPress={() => navigation.goBack()}
         >
           <MaterialIcons name="arrow-back" size={24} color="#4CAF50" />
-          <Text style={styles.returnText}>Return</Text>
         </TouchableOpacity>
 
         <View style={styles.errorContainer}>
@@ -223,7 +253,6 @@ export default function StructuralQuestionScreen({ navigation, route }) {
           onPress={() => navigation.goBack()}
         >
           <MaterialIcons name="arrow-back" size={24} color="#4CAF50" />
-          <Text style={styles.returnText}>Return</Text>
         </TouchableOpacity>
 
         <View style={styles.loadingContainer}>
@@ -241,7 +270,6 @@ export default function StructuralQuestionScreen({ navigation, route }) {
           onPress={() => navigation.goBack()}
         >
           <MaterialIcons name="arrow-back" size={24} color="#4CAF50" />
-          <Text style={styles.returnText}>Return</Text>
         </TouchableOpacity>
 
         <View style={styles.noQuestionsContainer}>
@@ -258,7 +286,6 @@ export default function StructuralQuestionScreen({ navigation, route }) {
         onPress={handleReturn}
       >
         <MaterialIcons name="arrow-back" size={24} color="#4CAF50" />
-        <Text style={styles.returnText}>Return</Text>
       </TouchableOpacity>
 
       <ScrollView style={styles.scrollView}>
@@ -272,6 +299,15 @@ export default function StructuralQuestionScreen({ navigation, route }) {
                 [{currentQuestion?.mark_allocation} marks]
               </Text>
               <Text style={styles.questionText}>{currentQuestion?.question_text}</Text>
+              {currentQuestion?.imageUrl && (
+                <View style={styles.imageContainer}>
+                  <Image
+                    source={{ uri: currentQuestion.imageUrl }}
+                    style={styles.questionImage}
+                    resizeMode="contain"
+                  />
+                </View>
+              )}
             </View>
           </View>
 
@@ -436,8 +472,9 @@ const styles = StyleSheet.create({
   returnButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    paddingTop: 40,
+    paddingTop: 100,
+    paddingLeft: 16,
+    paddingBottom: 20,
   },
   returnText: {
     marginLeft: 8,
@@ -715,5 +752,17 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  imageContainer: {
+    width: '100%',
+    height: 200,
+    marginVertical: 10,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#f5f5f5',
+  },
+  questionImage: {
+    width: '100%',
+    height: '100%',
   },
 });
