@@ -1,5 +1,25 @@
 import { supabase } from '../config/supabase.config';
 
+const getImageUrl = async (imagePath) => {
+  if (!imagePath) return null;
+  try {
+    const { data: { publicUrl }, error } = await supabase
+      .storage
+      .from('question-images')
+      .getPublicUrl(imagePath);
+    
+    if (error) {
+      console.error('Error getting image URL:', error);
+      return null;
+    }
+    
+    return publicUrl;
+  } catch (error) {
+    console.error('Error in getImageUrl:', error);
+    return null;
+  }
+};
+
 export const questionService = {
   getQuestionTypeId: async (typeName) => {
     try {
@@ -49,31 +69,29 @@ export const questionService = {
           const actualQuestionTypeId = 1;
           
           console.log('Querying structural_questions with:', {
-            topic_id: topicId,
-            question_type_id: actualQuestionTypeId
+            topicId,
+            actualQuestionTypeId,
           });
 
           const { data, error } = await supabase
             .from('structural_questions')
-            .select(`
-              id,
-              question,
-              topic_id,
-              question_type_id,
-              explanation,
-              solution,
-              diagram,
-              mark_allocation,
-              level_id,
-              subject_id
-            `)
+            .select('*')
             .eq('topic_id', topicId)
             .eq('question_type_id', actualQuestionTypeId);
 
           if (error) throw error;
-          
+
+          // Process images for questions if they exist
+          const questionsWithImages = await Promise.all(data.map(async (question) => {
+            if (question.image_path) {
+              const imageUrl = await getImageUrl(question.image_path);
+              return { ...question, imageUrl };
+            }
+            return question;
+          }));
+
           // Transform the data to match the expected format in the UI
-          const transformedData = data.map(question => ({
+          const transformedData = questionsWithImages.map(question => ({
             id: question.id,
             question_text: question.question,
             answer: question.solution,
@@ -82,35 +100,31 @@ export const questionService = {
             topic_id: question.topic_id,
             question_type_id: question.question_type_id,
             diagram: question.diagram,
-            mark_allocation: question.mark_allocation
+            mark_allocation: question.mark_allocation,
+            imageUrl: question.imageUrl,
           }));
 
           console.log('Transformed structural questions:', transformedData);
           return { data: transformedData, error: null };
         } else {
-          console.log('Building MCQ questions query...');
-          
           const { data, error } = await supabase
             .from('mcq_questions')
-            .select(`
-              id,
-              question_text,
-              topic_id,
-              question_type_id,
-              option_a,
-              option_b,
-              option_c,
-              option_d,
-              correct_answer,
-              explanation,
-              solution
-            `)
+            .select('*')
             .eq('topic_id', topicId)
             .eq('question_type_id', questionTypeId);
 
           if (error) throw error;
-          console.log('Fetched MCQ questions:', data);
-          return { data, error: null };
+
+          // Process images for MCQ questions if they exist
+          const questionsWithImages = await Promise.all(data.map(async (question) => {
+            if (question.image_path) {
+              const imageUrl = await getImageUrl(question.image_path);
+              return { ...question, imageUrl };
+            }
+            return question;
+          }));
+
+          return { data: questionsWithImages, error: null };
         }
       } catch (error) {
         console.error(`Attempt ${retryCount + 1} failed:`, error);
@@ -128,5 +142,28 @@ export const questionService = {
         await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
       }
     }
-  }
+  },
+
+  getQuestionById: async (questionId, tableName) => {
+    try {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .eq('id', questionId)
+        .single();
+
+      if (error) throw error;
+
+      // If there's an image path, get the public URL
+      if (data?.image_path) {
+        const imageUrl = await getImageUrl(data.image_path);
+        return { data: { ...data, imageUrl }, error: null };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error in getQuestionById:', error);
+      return { data: null, error };
+    }
+  },
 };

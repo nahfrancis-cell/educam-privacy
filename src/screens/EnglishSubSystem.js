@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '../styles/commonStyles';
+import SharedBottomNavigation from '../components/SharedBottomNavigation';
 
 const EnglishSubSystem = ({ navigation }) => {
   const educationTypes = [
@@ -113,47 +114,7 @@ const EnglishSubSystem = ({ navigation }) => {
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      <View style={styles.bottomNav}>
-        <TouchableOpacity 
-          style={styles.navItem} 
-          onPress={() => navigation.navigate('Home')}
-        >
-          <MaterialIcons name="home" size={24} color="#34C759" />
-          <Text style={[styles.navText, styles.navTextActive]}>Home</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.navItem} 
-          onPress={() => navigation.navigate('Notes')}
-        >
-          <MaterialIcons name="note" size={24} color="#666666" />
-          <Text style={styles.navText}>Notes</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.navItem} 
-          onPress={() => navigation.navigate('Profile')}
-        >
-          <MaterialIcons name="person" size={24} color="#666666" />
-          <Text style={styles.navText}>Profile</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.navItem} 
-          onPress={() => navigation.navigate('Help')}
-        >
-          <MaterialIcons name="help" size={24} color="#666666" />
-          <Text style={styles.navText}>Help</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.navItem} 
-          onPress={() => navigation.navigate('Logout')}
-        >
-          <MaterialIcons name="logout" size={24} color="#666666" />
-          <Text style={styles.navText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
+      <SharedBottomNavigation navigation={navigation} />
     </SafeAreaView>
   );
 };
@@ -161,27 +122,26 @@ const EnglishSubSystem = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E8F5E9',
+    backgroundColor: '#f0f9f0',
+    paddingTop: 80,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 20,
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'ios' ? 20 : 40,
-    paddingBottom: 16,
-    backgroundColor: '#E8F5E9',
-    borderBottomWidth: 1,
-    borderBottomColor: '#C8E6C9',
+    position: 'relative',
   },
   backButton: {
-    padding: 8,
+    position: 'absolute',
+    left: 16,
+    zIndex: 1,
   },
   headerTitle: {
     flex: 1,
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginRight: 40,
   },
   content: {
     flex: 1,
@@ -244,31 +204,6 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 20,
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  navItem: {
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  navText: {
-    fontSize: 12,
-    marginTop: 4,
-    color: '#666666',
-  },
-  navTextActive: {
-    color: '#34C759',
   },
 });
 

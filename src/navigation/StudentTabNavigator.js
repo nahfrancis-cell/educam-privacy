@@ -24,8 +24,6 @@ const StudentTabNavigator = () => {
             iconName = 'note';
           } else if (route.name === 'Help') {
             iconName = 'help';
-          } else if (route.name === 'Logout') {
-            iconName = 'logout';
           }
 
           return <MaterialIcons name={iconName} size={size} color={color} />;
@@ -39,19 +37,6 @@ const StudentTabNavigator = () => {
       <Tab.Screen name="Notes" component={NotesScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="Help" component={HelpScreen} />
-      <Tab.Screen 
-        name="Logout" 
-        component={HomeScreen}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            e.preventDefault();
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Login' }],
-            });
-          },
-        })}
-      />
     </Tab.Navigator>
   );
 };

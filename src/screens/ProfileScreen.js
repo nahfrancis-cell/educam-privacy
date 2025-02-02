@@ -84,13 +84,7 @@ const ProfileScreen = ({ navigation, route }) => {
         <View style={styles.content}>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-            >
-              <MaterialIcons name="arrow-back" size={24} color="#34C759" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>User Profile</Text>
+            <Text style={[styles.headerTitle, { marginRight: 0 }]}>User Profile</Text>
           </View>
 
           {/* Profile Picture Section */}
@@ -164,22 +158,18 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 12,
+    paddingTop: Platform.OS === 'ios' ? 60 : 80,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
   },
-  backButton: {
-    padding: 8,
-    marginRight: 16,
-  },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     flex: 1,
     textAlign: 'center',
-    marginRight: 48,
   },
   profileImageContainer: {
     alignItems: 'center',

@@ -15,18 +15,20 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nahfrancis.educam",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.nahfrancis.educam",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "package": "com.nahfrancis.educam",
-      "versionCode": 8,
-      "compileSdkVersion": 34,
-      "targetSdkVersion": 34
+      }
     },
+    "scheme": "educam",
     "web": {
       "favicon": "./assets/favicon.png"
     },

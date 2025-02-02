@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   returnButton: {
     padding: 10,
     paddingTop: Platform.OS === 'android' ? 40 : 10,
-    marginTop: 10,
+    marginTop: 30,
   },
   scrollView: {
     flex: 1,

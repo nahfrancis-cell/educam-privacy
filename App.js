@@ -1,4 +1,6 @@
 // Import polyfills first
+import 'react-native-get-random-values';
+import * as Crypto from 'expo-crypto';
 import './src/polyfills';
 
 // Then import React and other dependencies
@@ -6,6 +8,7 @@ import { AppRegistry, Platform } from 'react-native';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -24,12 +27,16 @@ import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
 import SelectLevelScreen from './src/screens/SelectLevelScreen';
 import TopicAndQuestionTypeScreen from './src/screens/TopicAndQuestionTypeScreen';
 import StructuralQuestionScreen from './src/screens/StructuralQuestionScreen';
+import QuestionImageManager from './src/screens/admin/QuestionImageManager';
 import MainStack from './src/navigation/MainStack';
 import EnglishSubSystem from './src/screens/EnglishSubSystem';
 import EmailVerificationScreen from './src/screens/EmailVerificationScreen';
 import PasswordVerificationScreen from './src/screens/PasswordVerificationScreen';
 
+// Removed unused SignUpScreen import
+
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 // Handle deep linking
 const scheme = 'com.nahfrancis.educam';
@@ -57,20 +64,13 @@ const linking = {
 
 const App = () => {
   return (
-    <SafeAreaProvider>
-      <PaperProvider>
+    <PaperProvider>
+      <SafeAreaProvider>
         <NavigationContainer linking={linking}>
           <Stack.Navigator
             initialRouteName="Welcome"
             screenOptions={{
-              headerShown: false,  // This will hide the header for all screens
-              headerStyle: {
-                backgroundColor: '#f4511e',
-              },
-              headerTintColor: '#fff',
-              headerTitleStyle: {
-                fontWeight: 'bold',
-              },
+              headerShown: false
             }}
           >
             <Stack.Screen name="Welcome" component={WelcomeScreen} />
@@ -83,16 +83,16 @@ const App = () => {
             <Stack.Screen name="ResetPasswordConfirm" component={ResetPasswordConfirmScreen} />
             <Stack.Screen name="AccessType" component={AccessTypeScreen} />
             <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
-            <Stack.Screen name="StudentRoot" component={MainStack} />
+            <Stack.Screen name="MainStack" component={MainStack} />
             <Stack.Screen name="SelectLevel" component={SelectLevelScreen} />
             <Stack.Screen name="TopicAndQuestionType" component={TopicAndQuestionTypeScreen} />
             <Stack.Screen name="MCQQuestion" component={MCQQuestionScreen} />
             <Stack.Screen name="StructuralQuestion" component={StructuralQuestionScreen} />
-            <Stack.Screen name="EnglishSubSystem" component={EnglishSubSystem} />
+            <Stack.Screen name="QuestionImageManager" component={QuestionImageManager} />
           </Stack.Navigator>
         </NavigationContainer>
-      </PaperProvider>
-    </SafeAreaProvider>
+      </SafeAreaProvider>
+    </PaperProvider>
   );
 }
 

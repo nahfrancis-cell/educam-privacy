@@ -1,169 +1,97 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-  SafeAreaView,
-  Platform,
-} from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { authService } from '../services/authService';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { supabase } from '../config/supabase.config';
 
-const ForgotPasswordScreen = ({ navigation }) => {
+export default function ForgotPasswordScreen({ navigation }) {
   const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleResetPassword = async () => {
-    if (!email) {
-      Alert.alert('Error', 'Please enter your email address');
-      return;
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert('Error', 'Please enter a valid email address');
-      return;
-    }
-
-    setIsLoading(true);
     try {
-      const { error } = await authService.resetPassword(email.trim().toLowerCase());
+      setLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
       
-      if (error) {
-        Alert.alert('Error', error.message);
-        return;
-      }
-
+      if (error) throw error;
+      
       Alert.alert(
-        'Success',
-        'Password reset instructions have been sent to your email',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('PasswordVerification', { email })
-          }
-        ]
+        'Email Sent',
+        'Check your email for the password reset link',
+        [{ text: 'OK', onPress: () => navigation.goBack() }]
       );
     } catch (error) {
-      Alert.alert('Error', 'Failed to send reset instructions. Please try again later.');
+      Alert.alert('Error', error.message);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <Text style={styles.title}>Forgot Password?</Text>
+      
+      <TextInput
+        style={styles.input}
+        placeholder="Enter your email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
+
       <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        style={styles.button}
+        onPress={handleResetPassword}
+        disabled={loading}
       >
-        <MaterialIcons name="arrow-back" size={24} color="#34C759" />
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Send Reset Link</Text>
+        )}
       </TouchableOpacity>
 
-      <View style={styles.content}>
-        <Text style={styles.title}>Forgot Password</Text>
-        <Text style={styles.subtitle}>Enter your email to reset password</Text>
-
-        <View style={styles.form}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.button, isLoading && styles.buttonDisabled]}
-            onPress={handleResetPassword}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text style={styles.buttonText}>Reset Password</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-    </SafeAreaView>
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <Text style={styles.backLink}>Back to Login</Text>
+      </TouchableOpacity>
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    justifyContent: 'center',
     padding: 20,
-  },
-  backButton: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 120 : 90,
-    left: 16,
-    zIndex: 1,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 100,
+    backgroundColor: '#f5f5f5',
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#000000',
-    marginBottom: 8,
+    fontSize: 24,
+    fontWeight: '600',
+    marginBottom: 30,
     textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666666',
-    marginBottom: 40,
-    textAlign: 'center',
-  },
-  form: {
-    width: '100%',
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    color: '#000000',
-    marginBottom: 8,
   },
   input: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E5E5',
-    padding: 16,
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 15,
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#34C759',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: '#2196F3',
+    padding: 15,
+    borderRadius: 8,
     alignItems: 'center',
-    marginTop: 20,
-  },
-  buttonDisabled: {
-    opacity: 0.7,
+    marginBottom: 20,
   },
   buttonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: 'white',
     fontWeight: '600',
+    fontSize: 16,
+  },
+  backLink: {
+    color: '#2196F3',
+    textAlign: 'center',
+    marginTop: 15,
   },
 });
-
-export default ForgotPasswordScreen;

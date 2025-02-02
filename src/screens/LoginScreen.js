@@ -1,267 +1,316 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
+  Image,
   StyleSheet,
   Alert,
   ActivityIndicator,
   SafeAreaView,
-  Platform,
-  KeyboardAvoidingView,
-  ScrollView,
-  Keyboard,
-  TouchableWithoutFeedback,
+  ScrollView
 } from 'react-native';
+import { supabase } from '../config/supabase.config';
+import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { authService } from '../services/authService';
-import { roleService } from '../services/roleService';
+import { Platform } from 'react-native';
+import * as Linking from 'expo-linking';
 
-const LoginScreen = ({ navigation }) => {
+// Base64 encoded SVG logo
+const logoBase64 = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCAyMDAgNTAiPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMjE5NkYzIj5QcmVwRXhhbTwvdGV4dD48L3N2Zz4=';
+
+const googleLogoBase64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIuMjQgMTAuMjg1VjE0LjRoNi44MDZjLS4yNzUgMS43NjUtMS45NjcgNS4xNzQtNi44MDYgNS4xNzQtNC4wOTUgMC03LjQzOS0zLjM4OS03LjQzOS03LjU3NFM4LjE0NSA0LjQyNiAxMi4yNCA0LjQyNmMyLjMzIDAgMy44OS45ODkgNC43ODUgMS44NDlsLjMxLS4zMUwxOS4zMSAzLjYyQzE3LjI0IDEuNjY1IDE0Ljk5NSAwIDEyLjI0IDAgNS40OTQgMCAwIDUuNDk0IDAgMTIuMjRjMCA2Ljc0NSA1LjQ5NCAxMi4yNCAxMi4yNCAxMi4yNGM3LjA3IDAgMTEuNzYtNC45NyAxMS43Ni0xMS45NTUgMC0uODA1LS4wODUtMS40Mi0uMTktMi4wMzVoLTExLjU3eiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
+
+export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
 
-  const handleLogin = async () => {
+  const handleSignIn = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
-    setIsLoading(true);
     try {
-      const { data, error } = await authService.signIn({ email, password });
-      
-      if (error) {
-        Alert.alert('Error', error.message);
-        return;
-      }
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      console.log('User logged in successfully:', data.user.id);
+      if (error) throw error;
 
-      // Check if user is admin
-      const isAdmin = await roleService.isAdmin(data.user.id);
-      console.log('Admin check result:', { userId: data.user.id, isAdmin });
-      
-      if (isAdmin === true) { 
-        console.log('Navigating to AccessType screen');
+      // Check if user is admin (email is admin@educam.com)
+      if (data?.user?.email === 'admin@educam.com') {
         navigation.replace('AccessType');
       } else {
-        console.log('Navigating to StudentRoot');
-        navigation.replace('StudentRoot', { screen: 'Home' });
+        // For regular users, navigate to MainStack with MainTabs screen
+        navigation.replace('MainStack', { screen: 'MainTabs' });
       }
       
     } catch (error) {
-      console.error('Login error:', error);
       Alert.alert('Error', error.message);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'educam://auth/callback',
+          scopes: 'email profile',
+          skipBrowserRedirect: true
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.url) {
+        // For mobile, we need to open the URL in a browser
+        Linking.openURL(data.url);
+      }
+      
+    } catch (error) {
+      console.error('Google Sign-In Error:', error);
+      Alert.alert(
+        'Google Sign-In Error',
+        'Unable to sign in with Google. Please try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        // Check if user is admin
+        if (session.user?.email === 'admin@educam.com') {
+          navigation.replace('AccessType');
+        } else {
+          // For regular users, navigate to MainStack with MainTabs screen
+          navigation.replace('MainStack', { screen: 'MainTabs' });
+        }
+      }
+    });
+  }, [navigation]);
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.headerContainer}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-            >
-              <MaterialIcons name="arrow-back" size={24} color="black" />
-            </TouchableOpacity>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Enter Details</Text>
+      </View>
+
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.formContainer}>
+          <Text style={styles.inputLabel}>Email</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your email address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
+            />
           </View>
 
-          <View style={styles.contentContainer}>
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Login to continue</Text>
+          <Text style={styles.inputLabel}>Password</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your password"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
+          </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
+          <TouchableOpacity 
+            style={[styles.button, { backgroundColor: '#4CAF50' }]}
+            onPress={handleSignIn}
+            disabled={loading}
+          >
+            <Text style={styles.loginButtonText}>
+              {loading ? 'Signing in...' : 'Login'}
+            </Text>
+          </TouchableOpacity>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Password</Text>
-              <View style={styles.passwordContainer}>
-                <TextInput
-                  style={styles.passwordInput}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
+          <View style={styles.orContainer}>
+            <View style={styles.orLine} />
+            <Text style={styles.orText}>or</Text>
+            <View style={styles.orLine} />
+          </View>
+
+          <Text style={styles.googleButtonLabel}>Continue with Google</Text>
+          <TouchableOpacity 
+            style={[styles.button, styles.googleButton]}
+            onPress={handleGoogleSignIn}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <>
+                <Image 
+                  source={{ uri: googleLogoBase64 }}
+                  style={styles.googleLogo}
                 />
-                <TouchableOpacity
-                  style={styles.eyeIcon}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <MaterialIcons
-                    name={showPassword ? 'visibility' : 'visibility-off'}
-                    size={24}
-                    color="gray"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
+                <View style={styles.googleTextContainer}>
+                  <Text style={[styles.googleButtonText, { color: '#4285F4' }]}>G</Text>
+                  <Text style={[styles.googleButtonText, { color: '#EA4335' }]}>o</Text>
+                  <Text style={[styles.googleButtonText, { color: '#FBBC05' }]}>o</Text>
+                  <Text style={[styles.googleButtonText, { color: '#4285F4' }]}>g</Text>
+                  <Text style={[styles.googleButtonText, { color: '#34A853' }]}>l</Text>
+                  <Text style={[styles.googleButtonText, { color: '#EA4335' }]}>e</Text>
+                </View>
+              </>
+            )}
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.loginButton}
-              onPress={handleLogin}
-              disabled={isLoading}
-            >
-              <Text style={styles.loginButtonText}>
-                {isLoading ? 'Logging in...' : 'Login'}
-              </Text>
+          <View style={styles.linksContainer}>
+            <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+              <Text style={styles.linkText}>Forgot Password?</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.forgotPasswordLink}
-              onPress={() => navigation.navigate('ForgotPassword')}
-            >
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.createAccountLink}
-              onPress={() => navigation.navigate('CreateAccount')}
-            >
-              <Text style={styles.createAccountText}>
-                Don't have an account? <Text style={styles.createAccountTextBold}>Create Account</Text>
-              </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
+              <Text style={styles.linkText}>Create Account</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
-  scrollContainer: {
-    flexGrow: 1,
-    paddingBottom: 20,
-  },
-  headerContainer: {
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
-  },
-  backButton: {
-    padding: 8,
-  },
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  header: {
+    padding: 16,
+    paddingTop: 55,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
     backgroundColor: '#fff',
+    zIndex: 1,
+    alignItems: 'center',
   },
-  title: {
-    fontSize: 28,
+  headerTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center',
   },
-  subtitle: {
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  formContainer: {
+    padding: 20,
+    justifyContent: 'center',
+  },
+  inputLabel: {
     fontSize: 16,
-    color: '#666',
-    marginBottom: 30,
-    textAlign: 'center',
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 8,
   },
   inputContainer: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
     marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: '#333',
+    padding: 5,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
     padding: 12,
     fontSize: 16,
   },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
+  button: {
     borderRadius: 8,
+    padding: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 10,
   },
-  passwordInput: {
-    flex: 1,
-    padding: 12,
+  buttonText: {
+    color: '#fff',
     fontSize: 16,
-  },
-  eyeIcon: {
-    padding: 12,
-  },
-  loginButton: {
-    backgroundColor: '#34C759',
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 20,
+    fontWeight: '600',
   },
   loginButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: '600',
+    textAlign: 'center',
+    letterSpacing: 1,
   },
-  forgotPasswordLink: {
-    marginTop: 16,
+  orContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginVertical: 15,
   },
-  forgotPasswordText: {
-    fontSize: 14,
-    color: '#34C759',
-    textDecorationLine: 'underline',
+  orLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E0E0E0',
   },
-  createAccountLink: {
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  createAccountText: {
+  orText: {
+    marginHorizontal: 10,
+    color: '#757575',
     fontSize: 16,
-    color: '#666',
   },
-  createAccountTextBold: {
-    color: '#34C759',
+  linksContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  linkText: {
+    color: '#4CAF50',
+    fontSize: 14,
+  },
+  googleButtonLabel: {
+    textAlign: 'center',
+    marginBottom: 8,
+    color: '#666',
+    fontSize: 16,
+  },
+  googleButton: {
+    backgroundColor: '#000',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+  },
+  googleLogo: {
+    width: 28,
+    height: 28,
+  },
+  googleTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    marginRight: 28, 
+  },
+  googleButtonText: {
+    fontSize: 28,
     fontWeight: '600',
+    letterSpacing: 1,
   },
 });
-
-export default LoginScreen;

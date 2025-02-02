@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '../styles/commonStyles';
-import { supabase, getSession } from '../config/supabase.config';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { supabase, getCurrentSession } from '../config/supabase.config';
+import SharedBottomNavigation from '../components/SharedBottomNavigation';
 
 const SelectLevelScreen = ({ navigation, route }) => {
   const [levels, setLevels] = useState([]);
@@ -24,7 +24,7 @@ const SelectLevelScreen = ({ navigation, route }) => {
   }, []);
 
   const checkSession = async () => {
-    const session = await getSession();
+    const session = await getCurrentSession();
     if (!session) {
       navigation.replace('Login');
       return;
@@ -78,14 +78,7 @@ const SelectLevelScreen = ({ navigation, route }) => {
   };
 
   const handleTabPress = (tabName) => {
-    if (tabName === 'Logout') {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
-    } else {
-      navigation.navigate(tabName);
-    }
+    navigation.navigate(tabName);
   };
 
   if (isLoading) {
@@ -116,28 +109,6 @@ const SelectLevelScreen = ({ navigation, route }) => {
           >
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
-        </View>
-        <View style={styles.bottomNav}>
-          {['Home', 'Notes', 'Profile', 'Help', 'Logout'].map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              style={styles.tabItem}
-              onPress={() => handleTabPress(tab)}
-            >
-              <MaterialIcons
-                name={
-                  tab === 'Home' ? 'home' :
-                  tab === 'Notes' ? 'note' :
-                  tab === 'Profile' ? 'person' :
-                  tab === 'Help' ? 'help' :
-                  'logout'
-                }
-                size={24}
-                color="#666"
-              />
-              <Text style={styles.tabText}>{tab}</Text>
-            </TouchableOpacity>
-          ))}
         </View>
       </SafeAreaView>
     );
@@ -193,28 +164,7 @@ const SelectLevelScreen = ({ navigation, route }) => {
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      <View style={styles.bottomNav}>
-        {['Home', 'Notes', 'Profile', 'Help', 'Logout'].map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            style={styles.tabItem}
-            onPress={() => handleTabPress(tab)}
-          >
-            <MaterialIcons
-              name={
-                tab === 'Home' ? 'home' :
-                tab === 'Notes' ? 'note' :
-                tab === 'Profile' ? 'person' :
-                tab === 'Help' ? 'help' :
-                'logout'
-              }
-              size={24}
-              color="#666"
-            />
-            <Text style={styles.tabText}>{tab}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <SharedBottomNavigation navigation={navigation} />
     </SafeAreaView>
   );
 };
@@ -336,29 +286,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-    justifyContent: 'space-around',
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  tabItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-  },
-  tabText: {
-    fontSize: 12,
-    marginTop: 4,
-    color: '#666',
   },
   bottomSpacing: {
     height: 80, // Add extra space at the bottom to prevent content from being hidden behind the navigation bar

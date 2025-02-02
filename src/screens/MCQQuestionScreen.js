@@ -77,36 +77,43 @@ export default function MCQQuestionScreen({ navigation, route }) {
         throw new Error('No questions found for this topic');
       }
 
-      const questionsWithImages = await Promise.all(fetchedQuestions.map(async (question) => {
-        if (question.diagram) {
-          try {
-            // First check if the image exists in the bucket
-            const { data: exists } = await supabase
-              .storage
-              .from('question-images')
-              .list('', {
-                search: question.diagram
-              });
+      // First, filter questions that have diagram field
+      const questionsWithDiagrams = fetchedQuestions.filter(q => q.diagram);
+      
+      // Get all diagram paths
+      const diagramPaths = questionsWithDiagrams.map(q => q.diagram);
+      
+      try {
+        // Get all public URLs in one request
+        const { data: urls } = await supabase
+          .storage
+          .from('question-images')
+          .createSignedUrls(diagramPaths, 3600); // URLs valid for 1 hour
 
-            // Only get URL if image exists in bucket
-            if (exists && exists.length > 0) {
-              const { data } = supabase
-                .storage
-                .from('question-images')
-                .getPublicUrl(question.diagram);
-              
-              if (data?.publicUrl) {
-                return { ...question, imageUrl: data.publicUrl };
-              }
-            }
-          } catch (error) {
-            console.error('Error fetching image:', error);
+        // Create a map of diagram names to their URLs
+        const urlMap = {};
+        urls?.forEach(item => {
+          if (item.signedUrl) {
+            const pathParts = item.path.split('/');
+            const filename = pathParts[pathParts.length - 1];
+            urlMap[filename] = item.signedUrl;
           }
-        }
-        return { ...question, imageUrl: null };
-      }));
+        });
 
-      setQuestions(questionsWithImages);
+        // Map the URLs back to questions
+        const questionsWithImages = fetchedQuestions.map(question => {
+          if (question.diagram && urlMap[question.diagram]) {
+            return { ...question, imageUrl: urlMap[question.diagram] };
+          }
+          return { ...question, imageUrl: null };
+        });
+
+        setQuestions(questionsWithImages);
+      } catch (error) {
+        console.error('Error fetching images:', error);
+        setQuestions(fetchedQuestions.map(q => ({ ...q, imageUrl: null })));
+      }
+
       setCurrentQuestionIndex(0);
       setSelectedAnswer(null);
       setShowCorrectAnswer(false);

@@ -16,7 +16,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { deepseekService } from '../services/deepseekService';
 import { questionService } from '../services/questionService';
-import { supabase } from '../services/supabase';
+import { supabase } from '../config/supabase.config';
 
 export default function StructuralQuestionScreen({ navigation, route }) {
   const { topic, questionType } = route.params;
@@ -84,40 +84,48 @@ export default function StructuralQuestionScreen({ navigation, route }) {
         throw new Error('No questions found for this topic');
       }
 
-      // Add image URLs for questions that have diagrams
-      const questionsWithImages = await Promise.all(fetchedQuestions.map(async (question) => {
-        if (question.diagram) {
-          try {
-            // First check if the image exists in the bucket
-            const { data: exists } = await supabase
-              .storage
-              .from('question-images')
-              .list('', {
-                search: question.diagram
-              });
+      // First, filter questions that have diagram field
+      const questionsWithDiagrams = fetchedQuestions.filter(q => q.diagram);
+      
+      // Get all diagram paths
+      const diagramPaths = questionsWithDiagrams.map(q => q.diagram);
+      
+      try {
+        // Get all public URLs in one request
+        const { data: urls } = await supabase
+          .storage
+          .from('question-images')
+          .createSignedUrls(diagramPaths, 3600); // URLs valid for 1 hour
 
-            // Only get URL if image exists in bucket
-            if (exists && exists.length > 0) {
-              const { data } = supabase
-                .storage
-                .from('question-images')
-                .getPublicUrl(question.diagram);
-              
-              if (data?.publicUrl) {
-                return { ...question, imageUrl: data.publicUrl };
-              }
-            }
-          } catch (error) {
-            console.error('Error fetching image:', error);
+        // Create a map of diagram names to their URLs
+        const urlMap = {};
+        urls?.forEach(item => {
+          if (item.signedUrl) {
+            const pathParts = item.path.split('/');
+            const filename = pathParts[pathParts.length - 1];
+            urlMap[filename] = item.signedUrl;
           }
-        }
-        return { ...question, imageUrl: null };
-      }));
+        });
 
-      setQuestions(questionsWithImages);
-      setCurrentQuestionIndex(0);
-      setCurrentQuestion(questionsWithImages[0]);
-      setUserAnswer('');
+        // Map the URLs back to questions
+        const questionsWithImages = fetchedQuestions.map(question => {
+          if (question.diagram && urlMap[question.diagram]) {
+            return { ...question, imageUrl: urlMap[question.diagram] };
+          }
+          return { ...question, imageUrl: null };
+        });
+
+        setQuestions(questionsWithImages);
+        setCurrentQuestionIndex(0);
+        setCurrentQuestion(questionsWithImages[0]);
+        setUserAnswer('');
+      } catch (error) {
+        console.error('Error fetching images:', error);
+        setQuestions(fetchedQuestions.map(q => ({ ...q, imageUrl: null })));
+        setCurrentQuestionIndex(0);
+        setCurrentQuestion(fetchedQuestions[0]);
+        setUserAnswer('');
+      }
     } catch (error) {
       setErrorMessage(error.message || 'Failed to load questions');
       setQuestions([]);
@@ -299,7 +307,7 @@ export default function StructuralQuestionScreen({ navigation, route }) {
                 [{currentQuestion?.mark_allocation} marks]
               </Text>
               <Text style={styles.questionText}>{currentQuestion?.question_text}</Text>
-              {currentQuestion?.imageUrl && (
+              {currentQuestion?.diagram && currentQuestion?.imageUrl && (
                 <View style={styles.imageContainer}>
                   <Image
                     source={{ uri: currentQuestion.imageUrl }}

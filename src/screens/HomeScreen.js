@@ -13,7 +13,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 const HomeScreen = ({ navigation }) => {
   const handleSystemSelect = (system) => {
     if (system === 'English') {
-      navigation.navigate('EnglishSubSystem');
+      navigation.navigate('MainStack', { 
+        screen: 'EnglishSubSystem'
+      });
     } else if (system === 'French') {
       // Future implementation for French system
       alert('French system coming soon!');
