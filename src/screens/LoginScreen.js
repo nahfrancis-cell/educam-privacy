@@ -43,11 +43,18 @@ export default function LoginScreen() {
 
       if (error) throw error;
 
-      // Check if user is admin (email is admin@educam.com)
-      if (data?.user?.email === 'admin@educam.com') {
+      // Fetch user profile to check admin status
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('is_admin')
+        .eq('user_id', data.user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      if (profileData.is_admin) {
         navigation.replace('AccessType');
       } else {
-        // For regular users, navigate to MainStack with MainTabs screen
         navigation.replace('MainStack', { screen: 'MainTabs' });
       }
       
@@ -94,13 +101,21 @@ export default function LoginScreen() {
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        // Check if user is admin
-        if (session.user?.email === 'admin@educam.com') {
-          navigation.replace('AccessType');
-        } else {
-          // For regular users, navigate to MainStack with MainTabs screen
-          navigation.replace('MainStack', { screen: 'MainTabs' });
-        }
+        // Fetch user profile to check admin status
+        supabase
+          .from('user_profiles')
+          .select('is_admin')
+          .eq('user_id', session.user.id)
+          .single()
+          .then(({ data, error }) => {
+            if (error) throw error;
+
+            if (data.is_admin) {
+              navigation.replace('AccessType');
+            } else {
+              navigation.replace('MainStack', { screen: 'MainTabs' });
+            }
+          });
       }
     });
   }, [navigation]);

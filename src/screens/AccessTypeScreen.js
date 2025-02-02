@@ -29,7 +29,7 @@ const AccessTypeScreen = ({ navigation }) => {
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
             style={[styles.button, styles.studentButton]}
-            onPress={() => navigation.navigate('StudentRoot', { screen: 'Home' })}
+            onPress={() => navigation.replace('MainStack')}
           >
             <MaterialIcons name="person" size={24} color="#FFFFFF" style={styles.buttonIcon} />
             <View style={styles.buttonTextContainer}>
