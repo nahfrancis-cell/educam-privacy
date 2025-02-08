@@ -15,13 +15,15 @@
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
       "android": {
-        "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease",
-        "autoIncrement": true
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleRelease"
       }
     }
   },

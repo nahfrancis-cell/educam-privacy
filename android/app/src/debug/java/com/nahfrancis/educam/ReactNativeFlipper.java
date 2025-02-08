@@ -58,11 +58,17 @@ public class ReactNativeFlipper {
               @Override
               public void onReactContextInitialized(ReactContext reactContext) {
                 reactInstanceManager.removeReactInstanceEventListener(this);
-                FrescoFlipperPlugin.initializeFlipper(reactContext, client);
+                reactContext.runOnNativeModulesQueueThread(
+                    new Runnable() {
+                      @Override
+                      public void run() {
+                        client.addPlugin(new FrescoFlipperPlugin());
+                      }
+                    });
               }
             });
       } else {
-        FrescoFlipperPlugin.initializeFlipper(reactContext, client);
+        client.addPlugin(new FrescoFlipperPlugin());
       }
     }
   }
