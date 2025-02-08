@@ -9,13 +9,13 @@ import {
   Alert,
   ActivityIndicator,
   SafeAreaView,
-  ScrollView
+  ScrollView,
+  Platform,
 } from 'react-native';
 import { supabase } from '../config/supabase.config';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Platform } from 'react-native';
-import * as Linking from 'expo-linking';
+import { Linking } from 'expo-linking';
 
 // Base64 encoded SVG logo
 const logoBase64 = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCAyMDAgNTAiPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMjE5NkYzIj5QcmVwRXhhbTwvdGV4dD48L3N2Zz4=';
@@ -26,6 +26,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
 
   const handleSignIn = async () => {
@@ -65,37 +66,8 @@ export default function LoginScreen() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      setLoading(true);
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'educam://auth/callback',
-          scopes: 'email profile',
-          skipBrowserRedirect: true
-        }
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data?.url) {
-        // For mobile, we need to open the URL in a browser
-        Linking.openURL(data.url);
-      }
-      
-    } catch (error) {
-      console.error('Google Sign-In Error:', error);
-      Alert.alert(
-        'Google Sign-In Error',
-        'Unable to sign in with Google. Please try again.'
-      );
-    } finally {
-      setLoading(false);
-    }
+  const handleGoogleSignIn = () => {
+    Alert.alert('Not Available', 'Google Sign-In is not yet functional. Please use email and password.');
   };
 
   useEffect(() => {
@@ -131,12 +103,13 @@ export default function LoginScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.formContainer}>
+        <View style={styles.form}>
           <Text style={styles.inputLabel}>Email</Text>
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              placeholder="Enter your email address"
+              placeholder="Enter your email"
+              keyboardType="email-address"
               autoCapitalize="none"
               value={email}
               onChangeText={setEmail}
@@ -146,31 +119,43 @@ export default function LoginScreen() {
           <Text style={styles.inputLabel}>Password</Text>
           <View style={styles.inputContainer}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { flex: 1 }]}
               placeholder="Enter your password"
-              secureTextEntry
+              secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
+              autoCapitalize="none"
             />
+            <TouchableOpacity 
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.eyeIcon}
+            >
+              <MaterialIcons 
+                name={showPassword ? "visibility" : "visibility-off"} 
+                size={24} 
+                color="#666666" 
+              />
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity 
-            style={[styles.button, { backgroundColor: '#4CAF50' }]}
+            style={[styles.button, styles.loginButton]}
             onPress={handleSignIn}
             disabled={loading}
           >
-            <Text style={styles.loginButtonText}>
-              {loading ? 'Signing in...' : 'Login'}
-            </Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Login</Text>
+            )}
           </TouchableOpacity>
 
-          <View style={styles.orContainer}>
-            <View style={styles.orLine} />
-            <Text style={styles.orText}>or</Text>
-            <View style={styles.orLine} />
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>OR</Text>
+            <View style={styles.dividerLine} />
           </View>
 
-          <Text style={styles.googleButtonLabel}>Continue with Google</Text>
           <TouchableOpacity 
             style={[styles.button, styles.googleButton]}
             onPress={handleGoogleSignIn}
@@ -198,10 +183,10 @@ export default function LoginScreen() {
 
           <View style={styles.linksContainer}>
             <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-              <Text style={styles.linkText}>Forgot Password?</Text>
+              <Text style={styles.link}>Forgot Password?</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
-              <Text style={styles.linkText}>Create Account</Text>
+              <Text style={styles.link}>Create Account</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -216,31 +201,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    padding: 16,
-    paddingTop: 55,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    padding: 20,
+    paddingTop: 80,
     backgroundColor: '#fff',
-    zIndex: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    flexGrow: 1,
-  },
-  formContainer: {
     padding: 20,
-    justifyContent: 'center',
+  },
+  form: {
+    width: '100%',
   },
   inputLabel: {
     fontSize: 16,
-    fontWeight: '500',
     color: '#333',
     marginBottom: 8,
   },
@@ -249,66 +233,52 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 20,
     padding: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   input: {
     padding: 12,
     fontSize: 16,
+    flex: 1,
+  },
+  eyeIcon: {
+    padding: 8,
   },
   button: {
     borderRadius: 8,
     padding: 15,
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 10,
+    marginBottom: 15,
+  },
+  loginButton: {
+    backgroundColor: '#34C759',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '600',
-    textAlign: 'center',
-    letterSpacing: 1,
-  },
-  orContainer: {
+  divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 15,
+    marginVertical: 20,
   },
-  orLine: {
+  dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: '#e0e0e0',
   },
-  orText: {
+  dividerText: {
     marginHorizontal: 10,
-    color: '#757575',
-    fontSize: 16,
-  },
-  linksContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  linkText: {
-    color: '#4CAF50',
-    fontSize: 14,
-  },
-  googleButtonLabel: {
-    textAlign: 'center',
-    marginBottom: 8,
     color: '#666',
-    fontSize: 16,
   },
   googleButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 15,
     paddingVertical: 12,
     paddingHorizontal: 20,
   },
@@ -321,11 +291,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
-    marginRight: 28, 
+    marginRight: 28,
   },
   googleButtonText: {
     fontSize: 28,
     fontWeight: '600',
     letterSpacing: 1,
+  },
+  linksContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  link: {
+    color: '#34C759',
+    fontSize: 16,
   },
 });

@@ -43,7 +43,7 @@ const WelcomeScreen = ({ navigation }) => {
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
                   <MaterialIcons name="people" size={32} color="#2E7D32" />
-                  <Text style={styles.sectionTitle}>Welcome to PrepExam</Text>
+                  <Text style={styles.sectionTitle}>Welcome to Educam</Text>
                 </View>
                 <Text style={styles.welcomeText}>
                   Welcome to your comprehensive educational companion designed specifically for Cameroon's unique bilingual education system. Whether you're preparing for GCE (O/L & A/L), BAC, PROBATOIRE, BEPC, or other national exams, we're here to support your journey to excellence.
@@ -76,7 +76,7 @@ const WelcomeScreen = ({ navigation }) => {
               <View style={styles.bulletPoints}>
                 <View style={styles.bulletPoint}>
                   <MaterialIcons name="check-circle" size={24} color="#2E7D32" />
-                  <Text style={styles.bulletText}>Complete past exam coverage for all major Cameroon exams</Text>
+                  <Text style={styles.bulletText}>Complete past Sylable coverage for all major Cameroon exams</Text>
                 </View>
                 <View style={styles.bulletPoint}>
                   <MaterialIcons name="check-circle" size={24} color="#2E7D32" />
@@ -151,6 +151,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    marginBottom: 120, // Add space for the bottom buttons
   },
   headerBackground: {
     width: '100%',
@@ -301,20 +302,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
-    paddingTop: 15,
-    paddingBottom: Platform.OS === 'ios' ? 30 : 20,
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 15,
+    paddingVertical: 20,
     borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderTopColor: '#C8E6C9',
   },
 });
 

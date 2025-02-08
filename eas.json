@@ -19,9 +19,11 @@
     },
     "production": {
       "android": {
-        "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease",
-        "autoIncrement": true
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleRelease",
+        "autoIncrement": true,
+        "enableProguardInReleaseBuilds": true,
+        "enableR8": true
       }
     }
   },
