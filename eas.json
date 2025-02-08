@@ -23,7 +23,10 @@
     "production": {
       "android": {
         "buildType": "app-bundle",
-        "gradleCommand": ":app:bundleRelease"
+        "gradleCommand": ":app:bundleRelease",
+        "autoIncrement": true,
+        "enableProguardInReleaseBuilds": true,
+        "enableR8": true
       }
     }
   },

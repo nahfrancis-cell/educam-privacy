@@ -27,7 +27,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#4CAF50"
       },
-      "versionCode": 2
+      "versionCode": 4
     },
     "scheme": "educam",
     "web": {
@@ -37,6 +37,7 @@
       "eas": {
         "projectId": "70165515-5c76-400c-b266-703e5d5497bf"
       }
-    }
+    },
+    "owner": "nahfrancis"
   }
 }
