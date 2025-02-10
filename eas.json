@@ -24,9 +24,7 @@
       "android": {
         "buildType": "app-bundle",
         "gradleCommand": ":app:bundleRelease",
-        "autoIncrement": true,
-        "enableProguardInReleaseBuilds": true,
-        "enableR8": true
+        "autoIncrement": true
       }
     }
   },

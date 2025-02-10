@@ -27,7 +27,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#4CAF50"
       },
-      "versionCode": 4
+      "versionCode": 6
     },
     "scheme": "educam",
     "web": {

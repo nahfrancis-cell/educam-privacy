@@ -117,24 +117,32 @@ const CreateAccountScreen = ({ navigation }) => {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
             hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+            accessible={true}
+            accessibilityLabel="Go back"
+            accessibilityRole="button"
           >
-            <MaterialIcons name="arrow-back" size={24} color="#34C759" />
+            <MaterialIcons name="arrow-back" size={24} color="#000000" />
           </TouchableOpacity>
 
           <View style={styles.content}>
-            <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Sign up to get started</Text>
+            <View style={styles.headerContainer}>
+              <Text style={styles.title} accessibilityRole="header">Create Account</Text>
+              <Text style={styles.subtitle}>Sign up to get started</Text>
+            </View>
 
             <View style={styles.form}>
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Name <Text style={styles.required}>*</Text></Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Enter your name"
+                  placeholder=""
                   value={name}
                   onChangeText={setName}
                   autoCapitalize="words"
                   editable={!isLoading}
+                  accessible={true}
+                  accessibilityLabel="Name input field"
+                  accessibilityHint="Enter your full name"
                 />
               </View>
 
@@ -142,13 +150,16 @@ const CreateAccountScreen = ({ navigation }) => {
                 <Text style={styles.label}>Email <Text style={styles.required}>*</Text></Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Enter your email"
+                  placeholder=""
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
                   editable={!isLoading}
+                  accessible={true}
+                  accessibilityLabel="Email input field"
+                  accessibilityHint="Enter your email address"
                 />
               </View>
 
@@ -157,16 +168,22 @@ const CreateAccountScreen = ({ navigation }) => {
                 <View style={styles.passwordContainer}>
                   <TextInput
                     style={styles.passwordInput}
-                    placeholder="Enter your password"
+                    placeholder=""
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
                     editable={!isLoading}
+                    accessible={true}
+                    accessibilityLabel="Password input field"
+                    accessibilityHint="Enter your password, minimum 6 characters"
                   />
                   <TouchableOpacity
                     style={styles.eyeIcon}
                     onPress={() => setShowPassword(!showPassword)}
                     disabled={isLoading}
+                    accessible={true}
+                    accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+                    accessibilityRole="button"
                   >
                     <MaterialIcons
                       name={showPassword ? "visibility" : "visibility-off"}
@@ -182,16 +199,22 @@ const CreateAccountScreen = ({ navigation }) => {
                 <View style={styles.passwordContainer}>
                   <TextInput
                     style={styles.passwordInput}
-                    placeholder="Confirm your password"
+                    placeholder=""
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
                     secureTextEntry={!showConfirmPassword}
                     editable={!isLoading}
+                    accessible={true}
+                    accessibilityLabel="Confirm password input field"
+                    accessibilityHint="Re-enter your password to confirm"
                   />
                   <TouchableOpacity
                     style={styles.eyeIcon}
                     onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                     disabled={isLoading}
+                    accessible={true}
+                    accessibilityLabel={showConfirmPassword ? "Hide confirmed password" : "Show confirmed password"}
+                    accessibilityRole="button"
                   >
                     <MaterialIcons
                       name={showConfirmPassword ? "visibility" : "visibility-off"}
@@ -206,11 +229,14 @@ const CreateAccountScreen = ({ navigation }) => {
                 <Text style={styles.label}>Phone Number (Optional)</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Enter your phone number"
+                  placeholder=""
                   value={phoneNumber}
                   onChangeText={setPhoneNumber}
                   keyboardType="phone-pad"
                   editable={!isLoading}
+                  accessible={true}
+                  accessibilityLabel="Phone number input field"
+                  accessibilityHint="Enter your phone number"
                 />
               </View>
 
@@ -222,20 +248,15 @@ const CreateAccountScreen = ({ navigation }) => {
                 {isLoading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.buttonText}>Create Account</Text>
+                  <Text style={styles.createButtonText}>Create Account</Text>
                 )}
               </TouchableOpacity>
 
               <View style={styles.loginContainer}>
-                <Text style={styles.loginText}>
-                  Already have an account?{' '}
-                  <Text
-                    style={styles.loginLink}
-                    onPress={() => navigation.navigate('Login')}
-                  >
-                    Login
-                  </Text>
-                </Text>
+                <Text style={styles.loginText}>Already have an account? </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                  <Text style={styles.loginLink}>Login</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -268,16 +289,24 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
+  headerContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 10,
+    color: '#000000',
+    textAlign: 'center',
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666666',
-    marginBottom: 30,
+    fontSize: 18,
+    color: '#000000',
+    textAlign: 'center',
+    marginBottom: 32,
+    fontWeight: '500',
   },
   form: {
     width: '100%',
@@ -287,31 +316,45 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: '#333333',
+    color: '#000000',
     marginBottom: 8,
+    fontWeight: '500',
   },
   required: {
     color: '#FF3B30',
   },
   input: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 10,
-    padding: 15,
+    width: '100%',
+    height: 50,
+    borderWidth: 2,
+    borderColor: '#BDBDBD',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
+    color: '#000000',
     fontSize: 16,
   },
   passwordContainer: {
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
-    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#BDBDBD',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
   },
   passwordInput: {
     flex: 1,
-    padding: 15,
+    height: 50,
+    paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
+    color: '#000000',
     fontSize: 16,
+    borderWidth: 0,
   },
   eyeIcon: {
-    padding: 15,
+    padding: 10,
+    marginRight: 5,
   },
   createButton: {
     backgroundColor: '#34C759',
@@ -320,24 +363,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
   },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+  createButtonText: {
+    color: '#000000',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   loginContainer: {
-    marginTop: 24,
-    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 16,
   },
   loginText: {
-    fontSize: 16,
-    color: '#666666',
+    color: '#000000',
+    fontSize: 18,
   },
   loginLink: {
-    color: '#34C759',
+    color: '#000000',
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });

@@ -21,14 +21,15 @@ const WelcomeScreen = ({ navigation }) => {
       <View style={styles.mainContainer}>
         <ScrollView style={styles.scrollView}>
           <ImageBackground
-            source={{ uri: 'https://images.pexels.com/photos/256395/pexels-photo-256395.jpeg' }}
+            source={require('../assets/images/educam_logo.png')}
             style={styles.headerBackground}
+            resizeMode="contain"
           >
-            <View style={[styles.headerOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+            <View style={[styles.headerOverlay, { backgroundColor: 'rgba(255,255,255,0.7)' }]}>
               <View style={styles.header}>
-                <Text style={[styles.title, { textShadowColor: 'rgba(0,0,0,0.75)', textShadowOffset: { width: -1, height: 1 }, textShadowRadius: 10 }]}>PrepExam</Text>
-                <Text style={[styles.subtitle, { textShadowColor: 'rgba(0,0,0,0.75)', textShadowOffset: { width: -1, height: 1 }, textShadowRadius: 10 }]}>Excellence in Cameroon Education</Text>
-                <Text style={[styles.headerText, { textShadowColor: 'rgba(0,0,0,0.75)', textShadowOffset: { width: -1, height: 1 }, textShadowRadius: 10 }]}>Your Bilingual Learning Companion</Text>
+                <Text style={[styles.title, { textShadowColor: 'rgba(0,0,0,0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3, color: '#000000' }]}>EDUCAM</Text>
+                <Text style={[styles.subtitle, { textShadowColor: 'rgba(0,0,0,0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3, color: '#000000' }]}>Excellence in Cameroon Education</Text>
+                <Text style={[styles.headerText, { textShadowColor: 'rgba(0,0,0,0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3, color: '#000000' }]}>Your Bilingual Learning Companion</Text>
               </View>
             </View>
           </ImageBackground>
@@ -36,13 +37,13 @@ const WelcomeScreen = ({ navigation }) => {
           <View style={styles.contentContainer}>
             <View style={styles.imageSection}>
               <Image
-                source={{ uri: 'https://images.pexels.com/photos/1139319/pexels-photo-1139319.jpeg' }}
+                source={require('../assets/images/gbhs_mbouda.png')}
                 style={styles.sectionImage}
                 resizeMode="cover"
               />
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <MaterialIcons name="people" size={32} color="#2E7D32" />
+                  <MaterialIcons name="people" size={32} color="#000000" />
                   <Text style={styles.sectionTitle}>Welcome to Educam</Text>
                 </View>
                 <Text style={styles.welcomeText}>
@@ -53,13 +54,13 @@ const WelcomeScreen = ({ navigation }) => {
 
             <View style={styles.imageSection}>
               <Image
-                source={{ uri: 'https://images.pexels.com/photos/5905498/pexels-photo-5905498.jpeg' }}
+                source={require('../assets/images/minesec.png')}
                 style={styles.sectionImage}
                 resizeMode="cover"
               />
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <MaterialIcons name="menu-book" size={32} color="#2E7D32" />
+                  <MaterialIcons name="menu-book" size={32} color="#000000" />
                   <Text style={styles.sectionTitle}>Our Approach</Text>
                 </View>
                 <Text style={styles.featureText}>
@@ -70,32 +71,32 @@ const WelcomeScreen = ({ navigation }) => {
 
             <View style={[styles.highlightSection, styles.section]}>
               <View style={styles.sectionHeader}>
-                <MaterialIcons name="stars" size={32} color="#2E7D32" />
+                <MaterialIcons name="stars" size={32} color="#000000" />
                 <Text style={styles.highlightTitle}>What We Offer</Text>
               </View>
               <View style={styles.bulletPoints}>
                 <View style={styles.bulletPoint}>
-                  <MaterialIcons name="check-circle" size={24} color="#2E7D32" />
+                  <MaterialIcons name="check-circle" size={24} color="#000000" />
                   <Text style={styles.bulletText}>Complete past Sylable coverage for all major Cameroon exams</Text>
                 </View>
                 <View style={styles.bulletPoint}>
-                  <MaterialIcons name="check-circle" size={24} color="#2E7D32" />
+                  <MaterialIcons name="check-circle" size={24} color="#000000" />
                   <Text style={styles.bulletText}>Bilingual study materials (English & French)</Text>
                 </View>
                 <View style={styles.bulletPoint}>
-                  <MaterialIcons name="check-circle" size={24} color="#2E7D32" />
+                  <MaterialIcons name="check-circle" size={24} color="#000000" />
                   <Text style={styles.bulletText}>Smart performance tracking and analytics</Text>
                 </View>
                 <View style={styles.bulletPoint}>
-                  <MaterialIcons name="check-circle" size={24} color="#2E7D32" />
+                  <MaterialIcons name="check-circle" size={24} color="#000000" />
                   <Text style={styles.bulletText}>Multiple Choice & Structural Questions</Text>
                 </View>
                 <View style={styles.bulletPoint}>
-                  <MaterialIcons name="check-circle" size={24} color="#2E7D32" />
+                  <MaterialIcons name="check-circle" size={24} color="#000000" />
                   <Text style={styles.bulletText}>Personalized learning paths</Text>
                 </View>
                 <View style={styles.bulletPoint}>
-                  <MaterialIcons name="check-circle" size={24} color="#2E7D32" />
+                  <MaterialIcons name="check-circle" size={24} color="#000000" />
                   <Text style={styles.bulletText}>Expert-verified content</Text>
                 </View>
               </View>
@@ -103,14 +104,14 @@ const WelcomeScreen = ({ navigation }) => {
 
             <View style={styles.missionContainer}>
               <Image
-                source={{ uri: 'https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg' }}
+                source={require('../assets/images/gbhs_mbouda_campus.png')}
                 style={[styles.sectionImage, { marginBottom: 0 }]}
                 resizeMode="cover"
               />
 
               <View style={[styles.section, styles.missionSection]}>
                 <View style={styles.sectionHeader}>
-                  <MaterialIcons name="emoji-objects" size={32} color="#2E7D32" />
+                  <MaterialIcons name="emoji-objects" size={32} color="#000000" />
                   <Text style={styles.sectionTitle}>Our Mission</Text>
                 </View>
                 <Text style={styles.missionText}>
@@ -144,7 +145,7 @@ const WelcomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E8F5E9',
+    backgroundColor: '#FFFFFF',
   },
   mainContainer: {
     flex: 1,
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
   },
   headerBackground: {
     width: '100%',
-    height: Platform.OS === 'ios' ? 200 : 180,
+    height: Platform.OS === 'ios' ? 300 : 280,
   },
   headerOverlay: {
     flex: 1,
@@ -165,21 +166,24 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     padding: 15,
+    paddingTop: 60,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 5,
+    color: '#000000',
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    marginBottom: 5,
+    fontSize: 20,
+    color: '#000000',
+    marginBottom: 8,
+    fontWeight: '500',
   },
   headerText: {
-    fontSize: 14,
-    color: '#FFFFFF',
+    fontSize: 18,
+    color: '#000000',
+    fontWeight: '500',
   },
   contentContainer: {
     paddingHorizontal: 15,
@@ -209,20 +213,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     marginLeft: 10,
-    color: '#2E7D32',
+    color: '#000000',
   },
   welcomeText: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: '#666666',
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#000000',
   },
   featureText: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: '#666666',
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#000000',
   },
   highlightSection: {
     marginTop: 15,
@@ -236,10 +240,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   highlightTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     marginLeft: 10,
-    color: '#2E7D32',
+    color: '#000000',
   },
   bulletPoints: {
     marginTop: 10,
@@ -251,15 +255,15 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   bulletText: {
-    fontSize: 14,
+    fontSize: 16,
     marginLeft: 10,
     flex: 1,
-    color: '#666666',
+    color: '#000000',
   },
   missionText: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: '#666666',
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#000000',
   },
   missionContainer: {
     marginBottom: 20,
@@ -271,14 +275,14 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   createAccountButton: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#34C759',
     borderRadius: 25,
     padding: 15,
     alignItems: 'center',
     marginBottom: 10,
   },
   createAccountButtonText: {
-    color: '#FFFFFF',
+    color: '#000000',
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -289,12 +293,12 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   loginText: {
-    fontSize: 16,
-    color: '#555555',
+    fontSize: 18,
+    color: '#000000',
   },
   loginLink: {
-    fontSize: 16,
-    color: '#2E7D32',
+    fontSize: 18,
+    color: '#000000',
     fontWeight: 'bold',
   },
   bottomContainer: {
@@ -302,11 +306,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#E8F5E9',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 15,
     paddingVertical: 20,
     borderTopWidth: 1,
-    borderTopColor: '#C8E6C9',
+    borderTopColor: '#EEEEEE',
   },
 });
 

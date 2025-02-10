@@ -1,12 +1,33 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Alert, ActivityIndicator, SafeAreaView, Platform } from 'react-native';
 import { supabase } from '../config/supabase.config';
 
 export default function ForgotPasswordScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const isValidEmail = (email) => {
+    // Regular expression for email validation
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.(com|org|edu|net|gov|mil|biz|info|io|co|uk|fr|de|it|ru|br|in|edu\.cm|cm)$/i;
+    return emailRegex.test(email);
+  };
+
   const handleResetPassword = async () => {
+    if (!email.trim()) {
+      Alert.alert('Error', 'Please enter your email address');
+      return;
+    }
+
+    if (!email.includes('@')) {
+      Alert.alert('Error', 'Email must contain @ symbol');
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      Alert.alert('Error', 'Please enter a valid email address\nExample: name@domain.com');
+      return;
+    }
+
     try {
       setLoading(true);
       const { error } = await supabase.auth.resetPasswordForEmail(email);
@@ -26,72 +47,129 @@ export default function ForgotPasswordScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Forgot Password?</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Forgot Password?</Text>
+      </View>
       
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
+      <View style={styles.form}>
+        <Text style={styles.inputLabel}>Email</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email address"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+        </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleResetPassword}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Send Reset Link</Text>
-        )}
-      </TouchableOpacity>
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed
+          ]}
+          onPress={handleResetPassword}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#000000" />
+          ) : (
+            <Text style={styles.buttonText}>Send Reset Link</Text>
+          )}
+        </Pressable>
 
-      <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Text style={styles.backLink}>Back to Login</Text>
-      </TouchableOpacity>
-    </View>
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            styles.loginButton,
+            pressed && styles.loginButtonPressed
+          ]}
+          onPress={() => navigation.navigate('Login')}
+        >
+          <Text style={[styles.buttonText, styles.loginButtonText]}>Back to Login</Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    marginTop: Platform.OS === 'android' ? 80 : 60,
+    marginBottom: 60,
+    position: 'relative',
   },
   title: {
+    flex: 1,
     fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 30,
+    fontWeight: 'bold',
+    color: '#000000',
     textAlign: 'center',
   },
-  input: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 15,
-    fontSize: 16,
+  form: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 40,
   },
-  button: {
-    backgroundColor: '#2196F3',
-    padding: 15,
-    borderRadius: 8,
+  inputLabel: {
+    fontSize: 18,
+    color: '#000000',
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  inputContainer: {
+    width: '100%',
+    flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#BDBDBD',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
     marginBottom: 20,
   },
-  buttonText: {
-    color: 'white',
-    fontWeight: '600',
+  input: {
+    flex: 1,
+    height: 50,
+    paddingHorizontal: 16,
     fontSize: 16,
+    color: '#000000',
   },
-  backLink: {
-    color: '#2196F3',
-    textAlign: 'center',
-    marginTop: 15,
+  button: {
+    width: '100%',
+    height: 56,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    backgroundColor: '#34C759',
+    borderWidth: 0,
+  },
+  buttonPressed: {
+    backgroundColor: '#2BA149',
+  },
+  loginButton: {
+    backgroundColor: '#34C759',
+    borderWidth: 0,
+  },
+  loginButtonPressed: {
+    backgroundColor: '#2BA149',
+  },
+  buttonText: {
+    color: '#000000',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  loginButtonText: {
+    color: '#000000',
   },
 });

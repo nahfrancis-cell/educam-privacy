@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   Image,
   StyleSheet,
   Alert,
@@ -94,7 +94,7 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Enter Details</Text>
       </View>
 
@@ -108,7 +108,7 @@ export default function LoginScreen() {
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              placeholder="Enter your email"
+              placeholder=""
               keyboardType="email-address"
               autoCapitalize="none"
               value={email}
@@ -119,36 +119,43 @@ export default function LoginScreen() {
           <Text style={styles.inputLabel}>Password</Text>
           <View style={styles.inputContainer}>
             <TextInput
-              style={[styles.input, { flex: 1 }]}
-              placeholder="Enter your password"
+              style={[styles.input, { flex: 1, borderWidth: 0 }]}
+              placeholder=""
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
               autoCapitalize="none"
             />
-            <TouchableOpacity 
+            <Pressable 
               onPress={() => setShowPassword(!showPassword)}
-              style={styles.eyeIcon}
+              style={({ pressed }) => [
+                styles.eyeIcon,
+                pressed && styles.eyeIconPressed
+              ]}
             >
               <MaterialIcons 
                 name={showPassword ? "visibility" : "visibility-off"} 
                 size={24} 
                 color="#666666" 
               />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
-          <TouchableOpacity 
-            style={[styles.button, styles.loginButton]}
+          <Pressable 
+            style={({ pressed }) => [
+              styles.button,
+              styles.loginButton,
+              pressed && styles.buttonPressed
+            ]}
             onPress={handleSignIn}
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#000000" />
             ) : (
               <Text style={styles.buttonText}>Login</Text>
             )}
-          </TouchableOpacity>
+          </Pressable>
 
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
@@ -156,38 +163,25 @@ export default function LoginScreen() {
             <View style={styles.dividerLine} />
           </View>
 
-          <TouchableOpacity 
-            style={[styles.button, styles.googleButton]}
-            onPress={handleGoogleSignIn}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <>
-                <Image 
-                  source={{ uri: googleLogoBase64 }}
-                  style={styles.googleLogo}
-                />
-                <View style={styles.googleTextContainer}>
-                  <Text style={[styles.googleButtonText, { color: '#4285F4' }]}>G</Text>
-                  <Text style={[styles.googleButtonText, { color: '#EA4335' }]}>o</Text>
-                  <Text style={[styles.googleButtonText, { color: '#FBBC05' }]}>o</Text>
-                  <Text style={[styles.googleButtonText, { color: '#4285F4' }]}>g</Text>
-                  <Text style={[styles.googleButtonText, { color: '#34A853' }]}>l</Text>
-                  <Text style={[styles.googleButtonText, { color: '#EA4335' }]}>e</Text>
-                </View>
-              </>
-            )}
-          </TouchableOpacity>
-
           <View style={styles.linksContainer}>
-            <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+            <Pressable 
+              onPress={() => navigation.navigate('ForgotPassword')}
+              style={({ pressed }) => [
+                styles.linkButton,
+                pressed && styles.linkButtonPressed
+              ]}
+            >
               <Text style={styles.link}>Forgot Password?</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
+            </Pressable>
+            <Pressable 
+              onPress={() => navigation.navigate('CreateAccount')}
+              style={({ pressed }) => [
+                styles.linkButton,
+                pressed && styles.linkButtonPressed
+              ]}
+            >
               <Text style={styles.link}>Create Account</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </ScrollView>
@@ -200,111 +194,118 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  header: {
-    padding: 20,
-    paddingTop: 80,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+  headerContainer: {
+    width: '100%',
     alignItems: 'center',
+    paddingVertical: 24,
+    marginTop: Platform.OS === 'android' ? 20 : 0,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#000000',
     textAlign: 'center',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
   form: {
     width: '100%',
+    marginTop: 20,
   },
   inputLabel: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: 18,
+    color: '#000000',
     marginBottom: 8,
+    fontWeight: '500',
   },
   inputContainer: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    marginBottom: 20,
-    padding: 5,
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#BDBDBD',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    marginBottom: 20,
   },
   input: {
-    padding: 12,
-    fontSize: 16,
     flex: 1,
+    height: 50,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: '#000000',
   },
   eyeIcon: {
-    padding: 8,
+    padding: 10,
+    marginRight: 5,
+    borderRadius: 20,
+  },
+  eyeIconPressed: {
+    backgroundColor: 'rgba(52, 199, 89, 0.2)',
   },
   button: {
+    width: '100%',
+    height: 56,
     borderRadius: 8,
-    padding: 15,
-    alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 15,
+    alignItems: 'center',
+    marginTop: 20,
+    backgroundColor: '#34C759',
+    borderWidth: 0,
+  },
+  buttonPressed: {
+    backgroundColor: '#2BA149',  // Darker green for press effect
   },
   loginButton: {
-    backgroundColor: '#34C759',
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: '#000000',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: 30,
+    paddingHorizontal: 10,
   },
   dividerLine: {
     flex: 1,
-    height: 1,
-    backgroundColor: '#e0e0e0',
+    height: 2,
+    backgroundColor: '#BDBDBD',
   },
   dividerText: {
-    marginHorizontal: 10,
-    color: '#666',
-  },
-  googleButton: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-  },
-  googleLogo: {
-    width: 28,
-    height: 28,
-  },
-  googleTextContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    marginRight: 28,
-  },
-  googleButtonText: {
-    fontSize: 28,
-    fontWeight: '600',
-    letterSpacing: 1,
+    marginHorizontal: 20,
+    color: '#000000',
+    fontSize: 18,
+    fontWeight: '500',
   },
   linksContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
+    paddingHorizontal: 10,
+  },
+  linkButton: {
+    padding: 12,
+    borderWidth: 0,
+    borderRadius: 8,
+    minWidth: 150,
+    alignItems: 'center',
+    backgroundColor: '#34C759',
+  },
+  linkButtonPressed: {
+    backgroundColor: '#2BA149',  // Darker green for press effect
   },
   link: {
-    color: '#34C759',
-    fontSize: 16,
+    color: '#000000',
+    fontSize: 18,
+    fontWeight: '500',
   },
 });
