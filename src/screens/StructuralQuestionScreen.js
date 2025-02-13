@@ -11,6 +11,8 @@ import {
   Alert,
   Modal,
   Image,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -239,13 +241,6 @@ export default function StructuralQuestionScreen({ navigation, route }) {
   if (errorMessage) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <TouchableOpacity 
-          style={styles.returnButton}
-          onPress={() => navigation.goBack()}
-        >
-          <MaterialIcons name="arrow-back" size={24} color="#4CAF50" />
-        </TouchableOpacity>
-
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{errorMessage}</Text>
         </View>
@@ -256,13 +251,6 @@ export default function StructuralQuestionScreen({ navigation, route }) {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <TouchableOpacity 
-          style={styles.returnButton}
-          onPress={() => navigation.goBack()}
-        >
-          <MaterialIcons name="arrow-back" size={24} color="#4CAF50" />
-        </TouchableOpacity>
-
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4CAF50" />
         </View>
@@ -273,13 +261,6 @@ export default function StructuralQuestionScreen({ navigation, route }) {
   if (!questions.length) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <TouchableOpacity 
-          style={styles.returnButton}
-          onPress={() => navigation.goBack()}
-        >
-          <MaterialIcons name="arrow-back" size={24} color="#4CAF50" />
-        </TouchableOpacity>
-
         <View style={styles.noQuestionsContainer}>
           <Text style={styles.noQuestionsText}>No questions found for this topic</Text>
         </View>
@@ -288,187 +269,149 @@ export default function StructuralQuestionScreen({ navigation, route }) {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <TouchableOpacity 
-        style={styles.returnButton}
-        onPress={handleReturn}
-      >
-        <MaterialIcons name="arrow-back" size={24} color="#4CAF50" />
-      </TouchableOpacity>
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 40}
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <TouchableOpacity 
+          style={styles.returnButton}
+          onPress={handleReturn}
+        >
+        </TouchableOpacity>
 
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.mainContent}>
-          <View style={styles.questionSection}>
-            <View style={styles.questionContainer}>
-              <Text style={styles.questionNumber}>
-                Question {currentQuestionIndex + 1} of {questions.length}
-              </Text>
-              <Text style={styles.markAllocation}>
-                [{currentQuestion?.mark_allocation} marks]
-              </Text>
-              <Text style={styles.questionText}>{currentQuestion?.question_text}</Text>
-              {currentQuestion?.diagram && currentQuestion?.imageUrl && (
-                <View style={styles.imageContainer}>
-                  <Image
-                    source={{ uri: currentQuestion.imageUrl }}
-                    style={styles.questionImage}
-                    resizeMode="contain"
-                  />
+        <View style={styles.container}>
+          <ScrollView 
+            style={styles.scrollView}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.scrollViewContent}
+          >
+            <View style={styles.mainContent}>
+              {!evaluation && (
+                <View style={styles.questionSection}>
+                  <View style={styles.questionContainer}>
+                    <Text style={styles.questionNumber}>
+                      Question {currentQuestionIndex + 1} of {questions.length}
+                    </Text>
+                    <Text style={styles.markAllocation}>
+                      [{currentQuestion?.mark_allocation} marks]
+                    </Text>
+                    <Text style={styles.questionText}>{currentQuestion?.question_text}</Text>
+                    {currentQuestion?.diagram && currentQuestion?.imageUrl && (
+                      <View style={styles.imageContainer}>
+                        <Image
+                          source={{ uri: currentQuestion.imageUrl }}
+                          style={styles.questionImage}
+                          resizeMode="contain"
+                        />
+                      </View>
+                    )}
+                  </View>
                 </View>
               )}
+
+              <ScrollView style={styles.evaluationScroll}>
+                {evaluation && (
+                  <>
+                    <View style={styles.evaluationContainer}>
+                      <View style={styles.evaluationHeader}>
+                        <View style={styles.evaluatorIcon}>
+                          <MaterialIcons name="school" size={24} color="#666" />
+                        </View>
+                        <Text style={styles.evaluatorTitle}>CGCE Examiner</Text>
+                      </View>
+
+                      <View style={styles.evaluationContent}>
+                        <View style={styles.scoreBox}>
+                          <Text style={styles.scoreText}>
+                            {evaluation.explanation.split('.')[0]}
+                          </Text>
+                        </View>
+
+                        <Text style={styles.contentText}>
+                          {evaluation.explanation.split('.').slice(1).join('.').trim()}
+                        </Text>
+
+                        {evaluation.suggestions && (
+                          <Text style={styles.contentText}>
+                            {evaluation.suggestions}
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+
+                    <View style={styles.navigationControls}>
+                      <TouchableOpacity
+                        style={[styles.navButton, currentQuestionIndex === 0 && styles.navButtonDisabled]}
+                        onPress={handlePrevious}
+                        disabled={currentQuestionIndex === 0}
+                      >
+                        <Text style={[styles.navButtonText, currentQuestionIndex === 0 && styles.navButtonTextDisabled]}>Previous</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={[styles.navButton, currentQuestionIndex === questions.length - 1 && styles.navButtonDisabled]}
+                        onPress={handleNext}
+                        disabled={currentQuestionIndex === questions.length - 1}
+                      >
+                        <Text style={[styles.navButtonText, currentQuestionIndex === questions.length - 1 && styles.navButtonTextDisabled]}>Next</Text>
+                        <MaterialIcons 
+                          name="arrow-forward" 
+                          size={24} 
+                          color={currentQuestionIndex === questions.length - 1 ? '#999' : '#fff'} 
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
+              </ScrollView>
             </View>
-          </View>
-
-          <ScrollView style={styles.evaluationScroll}>
-            {evaluation && !isLoading && !errorMessage && (
-              <View style={styles.evaluationContainer}>
-                <View style={styles.evaluationHeader}>
-                  <View style={styles.evaluatorIcon}>
-                    <MaterialIcons name="school" size={24} color="#666" />
-                  </View>
-                  <Text style={styles.evaluatorTitle}>CGCE Examiner</Text>
-                </View>
-
-                <View style={styles.evaluationContent}>
-                  <View style={styles.scoreBox}>
-                    <Text style={styles.scoreText}>
-                      {evaluation.explanation.split('.')[0]} {/* Display just the score line */}
-                    </Text>
-                  </View>
-
-                  <Text style={styles.contentText}>
-                    {evaluation.explanation.split('.').slice(1).join('.').trim()} {/* Rest of the explanation */}
-                  </Text>
-
-                  {evaluation.suggestions && (
-                    <Text style={styles.contentText}>
-                      {evaluation.suggestions}
-                    </Text>
-                  )}
-                </View>
-              </View>
-            )}
           </ScrollView>
-        </View>
 
-        <View style={styles.inputContainer}>
-          {!evaluation ? (
-            <>
-              <TextInput
-                ref={inputRef}
-                style={styles.answerInput}
-                multiline
-                value={userAnswer}
-                onChangeText={setUserAnswer}
-                placeholder="Type answer and/or upload image..."
-                textAlignVertical="top"
-              />
+          {!evaluation && (
+            <View style={styles.inputSection}>
+              <View style={styles.unifiedInputContainer}>
+                <TextInput
+                  ref={inputRef}
+                  style={styles.answerInput}
+                  multiline
+                  value={userAnswer}
+                  onChangeText={setUserAnswer}
+                  placeholder="Type answer and/or upload image..."
+                  textAlignVertical="top"
+                />
 
-              <View style={styles.inputControls}>
-                <TouchableOpacity style={styles.iconButton} onPress={handlePlusButton}>
-                  <MaterialIcons name="add" size={24} color="#666" />
-                </TouchableOpacity>
-                
-                <TouchableOpacity style={styles.iconButton}>
-                  <MaterialIcons name="mic" size={24} color="#666" />
-                </TouchableOpacity>
+                <View style={styles.inputControls}>
+                  <TouchableOpacity style={styles.iconButton} onPress={handlePlusButton}>
+                    <MaterialIcons name="add" size={24} color="#666" />
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity style={styles.iconButton}>
+                    <MaterialIcons name="mic" size={24} color="#666" />
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={[
-                    styles.submitButton,
-                    !userAnswer.trim() && styles.submitButtonDisabled
-                  ]}
-                  onPress={handleSubmit}
-                  disabled={!userAnswer.trim() || isLoading}
-                >
-                  <MaterialIcons 
-                    name="arrow-forward" 
-                    size={24} 
-                    color={!userAnswer.trim() || isLoading ? '#999' : '#fff'} 
-                  />
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.submitButton,
+                      !userAnswer.trim() && styles.submitButtonDisabled
+                    ]}
+                    onPress={handleSubmit}
+                    disabled={!userAnswer.trim() || isLoading}
+                  >
+                    <MaterialIcons 
+                      name="arrow-forward" 
+                      size={24} 
+                      color={!userAnswer.trim() || isLoading ? '#999' : '#fff'} 
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
-            </>
-          ) : (
-            <View style={styles.navigationControls}>
-              <TouchableOpacity
-                style={[styles.navButton, currentQuestionIndex === 0 && styles.navButtonDisabled]}
-                onPress={handlePrevious}
-                disabled={currentQuestionIndex === 0}
-              >
-                <MaterialIcons 
-                  name="arrow-back" 
-                  size={24} 
-                  color={currentQuestionIndex === 0 ? '#999' : '#fff'} 
-                />
-                <Text style={[styles.navButtonText, currentQuestionIndex === 0 && styles.navButtonTextDisabled]}>Previous</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.navButton, currentQuestionIndex === questions.length - 1 && styles.navButtonDisabled]}
-                onPress={handleNext}
-                disabled={currentQuestionIndex === questions.length - 1}
-              >
-                <Text style={[styles.navButtonText, currentQuestionIndex === questions.length - 1 && styles.navButtonTextDisabled]}>Next</Text>
-                <MaterialIcons 
-                  name="arrow-forward" 
-                  size={24} 
-                  color={currentQuestionIndex === questions.length - 1 ? '#999' : '#fff'} 
-                />
-              </TouchableOpacity>
             </View>
           )}
         </View>
-
-        <Modal
-          transparent
-          visible={showImageOptions}
-          onRequestClose={() => setShowImageOptions(false)}
-          animationType="fade"
-        >
-          <TouchableOpacity 
-            style={styles.modalContainer} 
-            activeOpacity={1}
-            onPress={() => setShowImageOptions(false)}
-          >
-            <View 
-              style={[
-                styles.imageOptionsContainer,
-                {
-                  position: 'absolute',
-                  bottom: 140, 
-                  left: 16, 
-                }
-              ]}
-            >
-              <TouchableOpacity
-                style={styles.imageOption}
-                onPress={() => {
-                  takePhoto();
-                  setShowImageOptions(false); 
-                  inputRef.current?.focus();
-                }}
-              >
-                <MaterialIcons name="camera" size={24} color="#333" />
-                <Text style={styles.imageOptionText}>Take Photo</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.imageOption}
-                onPress={() => {
-                  pickImage();
-                  setShowImageOptions(false); 
-                  inputRef.current?.focus();
-                }}
-              >
-                <MaterialIcons name="image" size={24} color="#333" />
-                <Text style={styles.imageOptionText}>Upload Image</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        </Modal>
-      </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -477,30 +420,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e0f2e0',
   },
-  returnButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 100,
-    paddingLeft: 16,
-    paddingBottom: 20,
-  },
-  returnText: {
-    marginLeft: 8,
-    fontSize: 16,
-    color: '#4CAF50',
+  container: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
   },
   scrollView: {
     flex: 1,
   },
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    position: 'absolute',
-    top: 40,
-    left: 4,
-    zIndex: 1,
+  scrollViewContent: {
+    flexGrow: 0,
   },
   mainContent: {
     flex: 1,
@@ -509,10 +438,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 16,
   },
+  inputSection: {
+    backgroundColor: '#fff',
+    padding: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
   questionSection: {
     backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    marginTop: 20,
   },
   questionContainer: {
     marginBottom: 16,
@@ -528,12 +462,12 @@ const styles = StyleSheet.create({
     borderColor: '#e5e5e5',
     marginBottom: 16,
   },
-  inputContainer: {
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    backgroundColor: '#fff',
+  unifiedInputContainer: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    backgroundColor: '#f8f9fa',
     padding: 8,
-    minHeight: 60,
   },
   answerInput: {
     fontSize: 16,
@@ -542,8 +476,13 @@ const styles = StyleSheet.create({
     minHeight: 40,
     maxHeight: 120,
     backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    marginBottom: 8,
+  },
+  inputControls: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    marginTop: 8,
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -701,14 +640,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: '#333',
   },
-  inputControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    backgroundColor: '#fff',
-  },
   iconButton: {
     padding: 8,
     marginHorizontal: 4,
@@ -730,14 +661,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
     backgroundColor: '#fff',
   },
   navButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#4CAF50', // Changed from '#6200ee' to green
+    backgroundColor: '#4CAF50', 
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -772,5 +701,12 @@ const styles = StyleSheet.create({
   questionImage: {
     width: '100%',
     height: '100%',
+  },
+  returnButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 60,  
+    paddingLeft: 16,
+    paddingBottom: 20,
   },
 });
