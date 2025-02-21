@@ -108,7 +108,7 @@ export default function LoginScreen() {
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              placeholder=""
+              placeholder="Enter your email"
               keyboardType="email-address"
               autoCapitalize="none"
               value={email}
@@ -120,7 +120,7 @@ export default function LoginScreen() {
           <View style={styles.inputContainer}>
             <TextInput
               style={[styles.input, { flex: 1, borderWidth: 0 }]}
-              placeholder=""
+              placeholder="Enter your password"
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
@@ -163,6 +163,30 @@ export default function LoginScreen() {
             <View style={styles.dividerLine} />
           </View>
 
+          <Text style={styles.loginWithText}>Login with</Text>
+
+          <Pressable 
+            style={({ pressed }) => [
+              styles.button,
+              styles.googleButton,
+              pressed && styles.buttonPressed
+            ]}
+            onPress={handleGoogleSignIn}
+          >
+            <Image
+              source={{ uri: googleLogoBase64 }}
+              style={styles.googleIcon}
+            />
+            <View style={styles.googleTextContainer}>
+              <Text style={[styles.googleButtonText, { color: '#4285F4' }]}>G</Text>
+              <Text style={[styles.googleButtonText, { color: '#EA4335' }]}>o</Text>
+              <Text style={[styles.googleButtonText, { color: '#FBBC05' }]}>o</Text>
+              <Text style={[styles.googleButtonText, { color: '#4285F4' }]}>g</Text>
+              <Text style={[styles.googleButtonText, { color: '#34A853' }]}>l</Text>
+              <Text style={[styles.googleButtonText, { color: '#EA4335' }]}>e</Text>
+            </View>
+          </Pressable>
+
           <View style={styles.linksContainer}>
             <Pressable 
               onPress={() => navigation.navigate('ForgotPassword')}
@@ -173,6 +197,7 @@ export default function LoginScreen() {
             >
               <Text style={styles.link}>Forgot Password?</Text>
             </Pressable>
+            <View style={styles.linkSeparator} />
             <Pressable 
               onPress={() => navigation.navigate('CreateAccount')}
               style={({ pressed }) => [
@@ -216,23 +241,23 @@ const styles = StyleSheet.create({
   },
   form: {
     width: '100%',
-    marginTop: 20,
+    paddingHorizontal: 20,
+    gap: 8,
   },
   inputLabel: {
-    fontSize: 18,
-    color: '#000000',
-    marginBottom: 8,
-    fontWeight: '500',
+    fontSize: 16,
+    color: '#333333',
+    marginBottom: 4,
   },
   inputContainer: {
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#BDBDBD',
+    borderWidth: 1,
+    borderColor: '#dddddd',
     borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    marginBottom: 20,
+    marginBottom: 8,
+    backgroundColor: '#ffffff',
   },
   input: {
     flex: 1,
@@ -260,7 +285,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   buttonPressed: {
-    backgroundColor: '#2BA149',  // Darker green for press effect
+    opacity: 0.8,
   },
   loginButton: {
   },
@@ -272,25 +297,29 @@ const styles = StyleSheet.create({
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 30,
-    paddingHorizontal: 10,
+    marginVertical: 4,
+    width: '100%',
   },
   dividerLine: {
     flex: 1,
-    height: 2,
-    backgroundColor: '#BDBDBD',
+    height: 1,
+    backgroundColor: '#dddddd',
   },
   dividerText: {
-    marginHorizontal: 20,
-    color: '#000000',
-    fontSize: 18,
+    marginHorizontal: 10,
+    color: '#333333',
+    fontSize: 14,
     fontWeight: '500',
   },
   linksContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    paddingHorizontal: 10,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 5,
+  },
+  linkSeparator: {
+    height: 8,
   },
   linkButton: {
     padding: 12,
@@ -307,5 +336,38 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 18,
     fontWeight: '500',
+  },
+  googleButton: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#dddddd',
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    elevation: 1,
+    paddingHorizontal: 20,
+  },
+  googleTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  googleIcon: {
+    width: 24,
+    height: 24,
+  },
+  googleButtonText: {
+    fontSize: 24,
+    fontWeight: '500',
+  },
+  loginWithText: {
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
+    marginBottom: 5,
+    fontWeight: '700',
   },
 });
